@@ -298,3 +298,8 @@ print("\n\nFinal Brier score: ", final_brier_scores, file=outfile)
 print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
 
 outfile.close()
+
+#XAI Part
+
+print("\n\nFinal Brier score: ", final_brier_scores)
+print("Final Accuracy score: ", final_accuracy_scores)
