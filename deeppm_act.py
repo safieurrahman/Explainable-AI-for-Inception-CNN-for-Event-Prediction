@@ -213,7 +213,8 @@ X_t = X_t / np.max(X_t)
 y_a = to_categorical(y_a)
 
 
-n_iter = 20
+#n_iter = 20
+n_iter = 1
 
 space = {'input_length':max_length, 'vocab_size':vocab_size, 'n_classes':n_classes, 'model_type':model_type, 'embedding_size':emb_size,
          'n_modules':hp.choice('n_modules', [1,2,3]),
