@@ -27,7 +27,7 @@ def load_data(logfile=None):
 
     for row in logreader:
         #t = datetime.strptime(row[2], "%Y/%m/%d %H:%M:%S.%f") #Commented '.%f' for Helpdesk Dataset
-        t = datetime.strptime(row[2], "%Y/%m/%d %H:%M:%S")
+        t = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S")
         if row[0]!=lastcase:  #'lastcase' is to save the last executed case for the loop
             casestarttime = t
             lasteventtime = t

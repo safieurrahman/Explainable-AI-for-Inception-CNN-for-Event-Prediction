@@ -226,7 +226,8 @@ final_brier_scores = []
 final_accuracy_scores = []
 final_mae_scores = []
 final_mse_scores = []
-for f in range(3):
+#for f in range(3): #to run for once rather than 3 and averaging the output returns
+for f in range(3):    
     print("Fold", f)
     outfile.write("\nFold: %d" % f)
     # split into train and test set
