@@ -23,6 +23,13 @@ import csv
 from time import perf_counter
 import time
 
+
+#Imports for Explainabaility Part
+
+import sklearn
+import lime
+import lime.lime_tabular
+
 from tensorflow.keras.utils import Sequence
 
 class DataGenerator(Sequence):
@@ -213,7 +220,7 @@ X_t = X_t / np.max(X_t)
 y_a = to_categorical(y_a)
 
 
-#n_iter = 20
+#n_iter = 20 #Commented for faster compilation at the expense of training weights
 n_iter = 1
 
 space = {'input_length':max_length, 'vocab_size':vocab_size, 'n_classes':n_classes, 'model_type':model_type, 'embedding_size':emb_size,
@@ -303,3 +310,14 @@ outfile.close()
 
 print("\n\nFinal Brier score: ", final_brier_scores)
 print("Final Accuracy score: ", final_accuracy_scores)
+
+predict_fn_model = lambda x: best_model.predict_proba(x).astype(float)
+
+# Lining-up the feature names
+# feature_names_activities = list(X_a)
+# feature_names_time = list(X_t)
+
+# feature_names = sum([feature_names_activities, feature_names_time], [])
+# print(feature_names)
+
+print (X_a[1].shape)
