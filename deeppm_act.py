@@ -23,6 +23,9 @@ import csv
 from time import perf_counter
 import time
 
+import matplotlib.pyplot as plt
+import eli5
+
 
 #Imports for Explainabaility Part
 
@@ -297,9 +300,8 @@ for f in range(1):
 
     outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
     
-
-
     outfile.flush()
+
 
 print("\n\nFinal Brier score: ", final_brier_scores, file=outfile)
 print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
@@ -312,12 +314,66 @@ print("\n\nFinal Brier score: ", final_brier_scores)
 print("Final Accuracy score: ", final_accuracy_scores)
 
 predict_fn_model = lambda x: best_model.predict_proba(x).astype(float)
+print (predict_fn_model)
+
 
 # Lining-up the feature names
-# feature_names_activities = list(X_a)
-# feature_names_time = list(X_t)
 
-# feature_names = sum([feature_names_activities, feature_names_time], [])
-# print(feature_names)
+feature_names_activities = "Activities"
+feature_names_time = "Time Span between Activities"
 
-print (X_a[1].shape)
+myList = list()
+myList.append(feature_names_activities)
+myList.append(feature_names_time)
+features_name = np.array(myList)
+print(features_name)
+
+# Create the LIME Explainer
+
+
+input1 = X_a_train
+input2 = X_t_train
+
+# print (X_a_train.shape)
+# print (X_t_train.shape)
+
+# merged_array = np.stack([input1,input2], axis=1)
+# input_lime = Concatenate()([input1, input2])
+
+# # print (merged_array.shape)
+# # merged_array= merged_array.transpose(0, 2, 1)
+# # merged_array.reshape (6604,13,13)
+# # print (merged_array.shape)
+
+# # print (X_a_test[0].shape)
+# # print (X_t_test[0].shape)
+
+
+# # print (X_a_test[0])
+# # print (X_t_test[0])
+
+# # print (shap_input)
+# # explainer = lime.lime_tabular.LimeTabularExplainer(np.array(shap_input)[:1000], feature_names = features_name)
+
+# print ("Good till here")
+# # Get the explanation for Model
+
+# # exp = explainer.explain_instance([X_a_test[0],X_t_test[0]], predict_fn_model, num_features=2)
+# # exp.show_in_notebook(show_all=True)
+
+
+hiya = best_model.get_weights()
+print (hiya)
+
+import shap
+
+# print the JS visualization code to the notebook
+shap.initjs()
+
+# we use the first 100 training examples as our background dataset to integrate over
+explainer = shap.DeepExplainer(model=best_model, data=[X_a_train, X_t_train])
+
+# explain the first 10 predictions
+# explaining each prediction requires 2 * background dataset size runs
+shap_values = explainer.shap_values(X_t_test)
+# shap.summary_plot(shap_values, [X_a_test, X_t_test], feature_names=features_name, plot_type="bar")
