@@ -198,6 +198,10 @@ def fit_and_score(params):
     return {'loss': score, 'status': STATUS_OK,  'n_epochs':  len(h.history['loss']), 'n_params':model.count_params(), 'time':end_time - start_time}
 
 
+def prob(data):
+    return np.array(list(zip(1-best_model.predict(data),best_model.predict(data))))
+
+
 logfile = sys.argv[1]
 model_type = sys.argv[2]
 output_file = sys.argv[3]
@@ -337,43 +341,47 @@ input2 = X_t_train
 # print (X_a_train.shape)
 # print (X_t_train.shape)
 
-# merged_array = np.stack([input1,input2], axis=1)
+merged_array = np.stack([input1,input2], axis=1)
 # input_lime = Concatenate()([input1, input2])
 
 # # print (merged_array.shape)
-# # merged_array= merged_array.transpose(0, 2, 1)
+merged_array= merged_array.transpose(0, 2, 1)
 # # merged_array.reshape (6604,13,13)
 # # print (merged_array.shape)
 
-# # print (X_a_test[0].shape)
-# # print (X_t_test[0].shape)
+print (X_a_test[0].shape)
+print (X_t_test[0].shape)
 
 
 # # print (X_a_test[0])
 # # print (X_t_test[0])
 
 # # print (shap_input)
-# # explainer = lime.lime_tabular.LimeTabularExplainer(np.array(shap_input)[:1000], feature_names = features_name)
+explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, mode='classification',feature_names = features_name)
 
-# print ("Good till here")
-# # Get the explanation for Model
+merged_array_test = np.stack([X_a_test[0], X_t_test[0]], axis=1)
+# merged_array_test= merged_array_test.transpose(0, 2, 1)
+print(merged_array_test.shape)
 
-# # exp = explainer.explain_instance([X_a_test[0],X_t_test[0]], predict_fn_model, num_features=2)
-# # exp.show_in_notebook(show_all=True)
+merged_array_test1= np.concatenate((X_a_test[0], X_t_test[0]))
+print(merged_array_test1.shape)
+
+exp = explainer.explain_instance(merged_array_test, classifier_fn = best_model.predict , num_features=2)
+exp.show_in_notebook(show_all=True)
 
 
-hiya = best_model.get_weights()
-print (hiya)
+# hiya = best_model.get_weights()
+# print (hiya)
 
-import shap
+# import shap
 
-# print the JS visualization code to the notebook
-shap.initjs()
+# # print the JS visualization code to the notebook
+# shap.initjs()
 
-# we use the first 100 training examples as our background dataset to integrate over
-explainer = shap.DeepExplainer(model=best_model, data=[X_a_train, X_t_train])
+# # we use the first 100 training examples as our background dataset to integrate over
+# explainer = shap.DeepExplainer(model=best_model, data=[X_a_train, X_t_train])
 
-# explain the first 10 predictions
-# explaining each prediction requires 2 * background dataset size runs
-shap_values = explainer.shap_values(X_t_test)
-# shap.summary_plot(shap_values, [X_a_test, X_t_test], feature_names=features_name, plot_type="bar")
+# # explain the first 10 predictions
+# # explaining each prediction requires 2 * background dataset size runs
+# shap_values = explainer.shap_values(X_a_test, X_t_test)
+# # shap.summary_plot(shap_values, [X_a_test, X_t_test], feature_names=features_name, plot_type="bar")
