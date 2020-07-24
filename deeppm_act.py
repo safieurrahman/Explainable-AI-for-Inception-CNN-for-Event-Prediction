@@ -24,7 +24,6 @@ from time import perf_counter
 import time
 
 import matplotlib.pyplot as plt
-import eli5
 
 
 #Imports for Explainabaility Part
@@ -34,6 +33,14 @@ import lime
 import lime.lime_tabular
 
 from tensorflow.keras.utils import Sequence
+
+
+from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
+import eli5
+from eli5.sklearn import PermutationImportance
+
+
+
 
 class DataGenerator(Sequence):
     def __init__(self, features, labels, batch_size=32, shuffle=True):
@@ -198,8 +205,6 @@ def fit_and_score(params):
     return {'loss': score, 'status': STATUS_OK,  'n_epochs':  len(h.history['loss']), 'n_params':model.count_params(), 'time':end_time - start_time}
 
 
-def prob(data):
-    return np.array(list(zip(1-best_model.predict(data),best_model.predict(data))))
 
 
 logfile = sys.argv[1]
@@ -302,6 +307,26 @@ for f in range(1):
     outfile.write("\nAccuracy: %f" % accuracy)
     final_accuracy_scores.append(accuracy)
 
+
+
+    # input1 = X_a_train
+    # input2 = X_t_train
+    # merged_array = np.stack([input1,input2], axis=1)
+    # merged_array= merged_array.transpose(0, 2, 1)
+    # feature_names_activities = "Activities"
+    # feature_names_time = "Time Span between Activities"
+    # myList = list()
+    # myList.append(feature_names_activities)
+    # myList.append(feature_names_time)
+    # features_name = np.array(myList)
+    # explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, feature_names = features_name)
+    # X = np.array([X_a_test[0], X_t_test[0]])
+    # exp = explainer.explain_instance(X, classifier_fn = f_wrapper, num_features=2)
+    # exp.show_in_notebook(show_all=True)
+
+
+
+
     outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
     
     outfile.flush()
@@ -357,16 +382,36 @@ print (X_t_test[0].shape)
 # # print (X_t_test[0])
 
 # # print (shap_input)
-explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, mode='classification',feature_names = features_name)
+
+def f_wrapper(X):
+    #input_list = X.tolist()
+    #print input_list
+    return best_model.predict([X_a_test[0],X_t_test[0]]).flatten()
+
+    
+explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, feature_names = features_name)
 
 merged_array_test = np.stack([X_a_test[0], X_t_test[0]], axis=1)
-# merged_array_test= merged_array_test.transpose(0, 2, 1)
 print(merged_array_test.shape)
 
-merged_array_test1= np.concatenate((X_a_test[0], X_t_test[0]))
-print(merged_array_test1.shape)
+# merged_array_test1= np.concatenate((X_a_test[0], X_t_test[0]))
+# print(merged_array_test1.shape)
 
-exp = explainer.explain_instance(merged_array_test, classifier_fn = best_model.predict , num_features=2)
+X = np.array([X_a_test[0], X_t_test[0]])
+
+# print (X.shape)
+# input_list = X.tolist()
+# print (input_list)
+
+
+def classifier_pred(input_data):
+    act = input_data[:,0]
+    tim = input_data[:,1]
+    print (act.shape)
+    pred = best_model.predict([act,tim])
+    return pred.flatten()
+
+exp = explainer.explain_instance(merged_array_test,classifier_pred(merged_array_test),num_features=2)
 exp.show_in_notebook(show_all=True)
 
 
@@ -385,3 +430,7 @@ exp.show_in_notebook(show_all=True)
 # # explaining each prediction requires 2 * background dataset size runs
 # shap_values = explainer.shap_values(X_a_test, X_t_test)
 # # shap.summary_plot(shap_values, [X_a_test, X_t_test], feature_names=features_name, plot_type="bar")
+
+
+# perm = PermutationImportance(best_model, scoring='accuracy', random_state=1).fit([X_a_train, X_t_train], y_a_train)
+# eli5.show_weights(perm, feature_names = features_name)
