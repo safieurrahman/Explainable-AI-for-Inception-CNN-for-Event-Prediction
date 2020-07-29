@@ -428,7 +428,7 @@ def classifier_pred(input_data):
     print (preds)
     return preds
 
-exp = explainer.explain_instance(merged_array_test,classifier_pred(),num_features=2)
+exp = explainer.explain_instance(merged_array_test, classifier_pred(merged_array_test), num_features=2)
 exp.show_in_notebook(show_all=True)
 
 
