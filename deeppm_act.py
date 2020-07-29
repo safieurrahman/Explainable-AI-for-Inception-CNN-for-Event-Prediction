@@ -39,6 +39,9 @@ from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 import eli5
 from eli5.sklearn import PermutationImportance
 
+import warnings
+warnings.filterwarnings('ignore')
+
 
 
 
@@ -324,7 +327,9 @@ for f in range(1):
     # exp = explainer.explain_instance(X, classifier_fn = f_wrapper, num_features=2)
     # exp.show_in_notebook(show_all=True)
 
+    
 
+    
 
 
     outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
@@ -341,10 +346,6 @@ outfile.close()
 
 print("\n\nFinal Brier score: ", final_brier_scores)
 print("Final Accuracy score: ", final_accuracy_scores)
-
-predict_fn_model = lambda x: best_model.predict_proba(x).astype(float)
-print (predict_fn_model)
-
 
 # Lining-up the feature names
 
@@ -372,7 +373,7 @@ merged_array = np.stack([input1,input2], axis=1)
 # # print (merged_array.shape)
 merged_array= merged_array.transpose(0, 2, 1)
 # # merged_array.reshape (6604,13,13)
-# # print (merged_array.shape)
+print (merged_array.shape)
 
 print (X_a_test[0].shape)
 print (X_t_test[0].shape)
@@ -386,32 +387,48 @@ print (X_t_test[0].shape)
 def f_wrapper(X):
     #input_list = X.tolist()
     #print input_list
-    return best_model.predict([X_a_test[0],X_t_test[0]]).flatten()
+    return best_model.predict(X).flatten()
 
     
 explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, feature_names = features_name)
 
-merged_array_test = np.stack([X_a_test[0], X_t_test[0]], axis=1)
+# merged_array_test = np.stack([X_a_test[0:1], X_t_test[0:1]], axis=1)
+# merged_array_test = merged_array_test.transpose(0, 2, 1)
+# print(merged_array_test.shape)
+
+merged_array_test = np.hstack((X_a_test[0:1], X_t_test[0:1]))
+#merged_array_test= merged_array_test.transpose(1,0)
 print(merged_array_test.shape)
+
+print (X_a_test[0:1].shape)
+print (X_t_test[0:1].shape)
+
+A =  best_model.predict((X_a_test[0:1],X_t_test[0:1]))
+print (A)
+print (np.argmax(A))
+
 
 # merged_array_test1= np.concatenate((X_a_test[0], X_t_test[0]))
 # print(merged_array_test1.shape)
 
-X = np.array([X_a_test[0], X_t_test[0]])
+X = np.array([X_a_test[0:1], X_t_test[0:1]])
 
-# print (X.shape)
+print (X.shape)
 # input_list = X.tolist()
 # print (input_list)
 
 
 def classifier_pred(input_data):
-    act = input_data[:,0]
-    tim = input_data[:,1]
+    print (input_data.shape)
+    act = input_data[:,0:13]
+    tim = input_data[:,13:26]
     print (act.shape)
-    pred = best_model.predict([act,tim])
-    return pred.flatten()
+    print (tim.shape)
+    preds = best_model.predict([act,tim])
+    print (preds)
+    return preds
 
-exp = explainer.explain_instance(merged_array_test,classifier_pred(merged_array_test),num_features=2)
+exp = explainer.explain_instance(merged_array_test,classifier_pred(),num_features=2)
 exp.show_in_notebook(show_all=True)
 
 
@@ -424,13 +441,49 @@ exp.show_in_notebook(show_all=True)
 # shap.initjs()
 
 # # we use the first 100 training examples as our background dataset to integrate over
-# explainer = shap.DeepExplainer(model=best_model, data=[X_a_train, X_t_train])
+# explainer = shap.DeepExplainer(best_model, data=[X_a_train, X_t_train])
+
+# print(X_a_test[0])
+# print(X_t_test[0])
+# temp = np.reshape(X_t_test[0],X_a_test[0].shape)
+# print(temp)
+
+
+# shap_values = explainer.shap_values([X_a_test[0:1], X_t_test[0:1]])
 
 # # explain the first 10 predictions
 # # explaining each prediction requires 2 * background dataset size runs
-# shap_values = explainer.shap_values(X_a_test, X_t_test)
-# # shap.summary_plot(shap_values, [X_a_test, X_t_test], feature_names=features_name, plot_type="bar")
+# #shap_values = explainer.shap_values([X_a_test, X_t_test])
+# shap.summary_plot(shap_values, [X_a_test[0:1], X_t_test[0:1]] , feature_names=features_name, plot_type="bar")
 
 
-# perm = PermutationImportance(best_model, scoring='accuracy', random_state=1).fit([X_a_train, X_t_train], y_a_train)
-# eli5.show_weights(perm, feature_names = features_name)
+# # # perm = PermutationImportance(best_model, scoring='accuracy', random_state=1).fit([X_a_train, X_t_train], y_a_train)
+# # # eli5.show_weights(perm, feature_names = features_name)
+
+
+# # # from alibi.explainers import KernelShap
+# # # import skimage
+
+# # # predict_fn = lambda x: clf.predict_proba(x)
+# # # explainer = KernelShap(classifier_pred, link='logit', feature_names=features_name)
+
+# # # explainer.fit(merged_array_test)
+# # # explanation = explainer.explain(X)
+
+
+
+# import shap
+
+# # Too many input data - use a random slice
+# # rather than use the whole training set to estimate expected values, we summarize with
+# # a set of weighted kmeans, each weighted by the number of points they represent.
+# # X_train_summary = shap.kmeans([X_a_train,X_t_train], 20)
+
+# # Compute Shap values
+# explainer = shap.DeepExplainer(best_model,[X_a_train, X_t_train])
+
+# # Make plot with combined shap values
+# # The training set is too big so let's sample it. We get enough point to draw conclusions
+# # X_train_sample = [X_a_train,X_t_train].sample(400)
+# shap_values  = explainer.shap_values([X_a_test[0:10], X_t_test[0:10]])
+# shap.summary_plot(shap_values, [X_a_test[0:10], X_t_test[0:10]] )
