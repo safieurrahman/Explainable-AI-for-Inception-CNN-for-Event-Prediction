@@ -392,28 +392,28 @@ def f_wrapper(X):
     
 explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, feature_names = features_name)
 
-# merged_array_test = np.stack([X_a_test[0:1], X_t_test[0:1]], axis=1)
-# merged_array_test = merged_array_test.transpose(0, 2, 1)
-# print(merged_array_test.shape)
-
-merged_array_test = np.hstack((X_a_test[0:1], X_t_test[0:1]))
-#merged_array_test= merged_array_test.transpose(1,0)
+merged_array_test = np.stack([X_a_test[0:100], X_t_test[0:100]], axis=1)
+merged_array_test = merged_array_test.transpose(0, 2, 1)
 print(merged_array_test.shape)
 
-print (X_a_test[0:1].shape)
-print (X_t_test[0:1].shape)
+# merged_array_test = np.hstack((X_a_test[0:100], X_t_test[0:100]))
+# #merged_array_test= merged_array_test.transpose(1,0)
+# print(merged_array_test.shape)
 
-A =  best_model.predict((X_a_test[0:1],X_t_test[0:1]))
-print (A)
-print (np.argmax(A))
+# print (X_a_test[0:1].shape)
+# print (X_t_test[0:1].shape)
+
+# A =  best_model.predict((X_a_test[0:1],X_t_test[0:1]))
+# print (A)
+# print (np.argmax(A))
 
 
 # merged_array_test1= np.concatenate((X_a_test[0], X_t_test[0]))
 # print(merged_array_test1.shape)
 
-X = np.array([X_a_test[0:1], X_t_test[0:1]])
+# X = np.array([X_a_test[0:1], X_t_test[0:1]])
 
-print (X.shape)
+# print (X.shape)
 # input_list = X.tolist()
 # print (input_list)
 
@@ -428,7 +428,7 @@ def classifier_pred(input_data):
     print (preds)
     return preds
 
-exp = explainer.explain_instance(merged_array_test, classifier_pred(merged_array_test), num_features=2)
+exp = explainer.explain_instance(merged_array_test, classifier_pred, num_features=2)
 exp.show_in_notebook(show_all=True)
 
 
