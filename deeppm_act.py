@@ -491,3 +491,8 @@ def classifier_pred(input_data):
 # from sklearn.inspection import plot_partial_dependence
 
 # my_plots = plot_partial_dependence(best_model.predict([X_a_train, X_t_train]),merged_array, features=[0,1])
+
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import itertools
+
+print(classification_report(y_a_test, preds_a))
