@@ -428,8 +428,8 @@ def classifier_pred(input_data):
     print (preds)
     return preds
 
-exp = explainer.explain_instance(merged_array_test, classifier_pred, num_features=2)
-exp.show_in_notebook(show_all=True)
+# exp = explainer.explain_instance(merged_array_test, classifier_pred, num_features=2)
+# exp.show_in_notebook(show_all=True)
 
 
 # hiya = best_model.get_weights()
@@ -487,3 +487,7 @@ exp.show_in_notebook(show_all=True)
 # # X_train_sample = [X_a_train,X_t_train].sample(400)
 # shap_values  = explainer.shap_values([X_a_test[0:10], X_t_test[0:10]])
 # shap.summary_plot(shap_values, [X_a_test[0:10], X_t_test[0:10]] )
+
+# from sklearn.inspection import plot_partial_dependence
+
+# my_plots = plot_partial_dependence(best_model.predict([X_a_train, X_t_train]),merged_array, features=[0,1])
