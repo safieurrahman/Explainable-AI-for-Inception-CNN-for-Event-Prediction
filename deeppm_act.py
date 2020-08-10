@@ -29,8 +29,8 @@ import matplotlib.pyplot as plt
 #Imports for Explainabaility Part
 
 import sklearn
-import lime
-import lime.lime_tabular
+# import lime
+# import lime.lime_tabular
 
 from tensorflow.keras.utils import Sequence
 
@@ -384,17 +384,17 @@ print (X_t_test[0].shape)
 
 # # print (shap_input)
 
-def f_wrapper(X):
-    #input_list = X.tolist()
-    #print input_list
-    return best_model.predict(X).flatten()
+# def f_wrapper(X):
+#     #input_list = X.tolist()
+#     #print input_list
+#     return best_model.predict(X).flatten()
 
     
-explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, feature_names = features_name)
+# explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, feature_names = features_name)
 
-merged_array_test = np.stack([X_a_test[0:100], X_t_test[0:100]], axis=1)
-merged_array_test = merged_array_test.transpose(0, 2, 1)
-print(merged_array_test.shape)
+# merged_array_test = np.stack([X_a_test[0:100], X_t_test[0:100]], axis=1)
+# merged_array_test = merged_array_test.transpose(0, 2, 1)
+# print(merged_array_test.shape)
 
 # merged_array_test = np.hstack((X_a_test[0:100], X_t_test[0:100]))
 # #merged_array_test= merged_array_test.transpose(1,0)
@@ -492,33 +492,98 @@ def classifier_pred(input_data):
 
 # my_plots = plot_partial_dependence(best_model.predict([X_a_train, X_t_train]),merged_array, features=[0,1])
 
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-import itertools
+# from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+# import itertools
 
-print(classification_report(y_a_test, preds_a))
+# print(classification_report(y_a_test, preds_a))
 
-cm = confusion_matrix(y_a_test, preds_a)
-classes = ['0', '1', '2', '3','4','5','6','7']
-fig = plt.figure(figsize=(10,10))
-plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Reds)
-plt.title('Confusion matrix for Classes')
-plt.colorbar()
-tick_marks = np.arange(len(classes))
+# cm = confusion_matrix(y_a_test, preds_a)
+# classes = ['0', '1', '2', '3','4','5','6','7']
+# fig = plt.figure(figsize=(10,10))
+# plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Reds)
+# plt.title('Confusion matrix for Classes')
+# plt.colorbar()
+# tick_marks = np.arange(len(classes))
 
-plt.xticks(tick_marks, classes, rotation=45)
-plt.yticks(tick_marks, classes)
+# plt.xticks(tick_marks, classes, rotation=45)
+# plt.yticks(tick_marks, classes)
 
-normalize = False
-fmt = '.2f' if normalize else 'd'
+# normalize = False
+# fmt = '.2f' if normalize else 'd'
 
-thresh = cm.max() / 2.
-for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-    plt.text(j, i, format(cm[i, j], fmt),
-             horizontalalignment="center",
-             color="white" if cm[i, j] > thresh else "black")
+# thresh = cm.max() / 2.
+# for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+#     plt.text(j, i, format(cm[i, j], fmt),
+#              horizontalalignment="center",
+#              color="white" if cm[i, j] > thresh else "black")
 
-plt.tight_layout()
-plt.ylabel('True label')
-plt.xlabel('Predicted label')
+# plt.tight_layout()
+# plt.ylabel('True label')
+# plt.xlabel('Predicted label')
 
 plt.show()
+
+def pdp_prob(input_data):
+    # print(merged_array_test.shape)
+    new_p = input_data[:,0:13]
+    new_p1 = input_data[:,13:26]
+    # print (new_p.shape)
+    # print (new_p1.shape)
+    preds = best_model.predict([new_p,new_p1])
+    return preds
+
+from interpret.blackbox import PartialDependence
+from interpret import show
+
+from interpret import preserve
+from interpret.provider import InlineProvider
+from interpret import set_visualize_provider
+
+set_visualize_provider(InlineProvider())
+
+print (X_a_test.shape)
+merged_array_test = np.hstack((X_a_test, X_t_test))
+# merged_array_test= merged_array_test.transpose(1,0)
+
+from interpret import set_show_addr, get_show_addr
+
+pdp = PartialDependence(predict_fn=pdp_prob, data=merged_array_test)
+pdp_global = pdp.explain_global(name='Partial Dependence')
+set_show_addr(('127.0.0.1', 7001))
+
+show(pdp_global)
+# plt.show()
+
+
+# preserve(pdp_global, 4, file_name='global-age-graph.html')
+
+pdp_global.visualize(0)  # visualizes the 20th featur
+pdp_global.visualize(0).write_html("graph0.html")  # can also pass in a full filepath here
+
+# pdp_global.visualize(1).write_html("graph1.html")  # can also pass in a full filepath here
+# pdp_global.visualize(2).write_html("graph2.html")  # can also pass in a full filepath here
+# pdp_global.visualize(3).write_html("graph3.html")  # can also pass in a full filepath here
+# pdp_global.visualize(13).write_html("graph13.html")  # can also pass in a full filepath here
+# pdp_global.visualize(15).write_html("graph15.html")  # can also pass in a full filepath here
+
+
+
+# from interpret.blackbox import LimeTabular
+# from interpret import show
+
+# #Blackbox explainers need a predict function, and optionally a dataset
+# lime = LimeTabular(predict_fn=pdp_prob, data=[X_a_train,X_t_train])
+
+# #Pick the instances to explain, optionally pass in labels if you have them
+# lime_local = lime.explain_local([X_a_test[0:1],X_t_test[0:1]], y_a_test[0:1], name='LIME')
+
+# show(lime_local)
+
+
+# from interpret.blackbox import ShapKernel
+
+# # background_val = np.median([X_a_train,X_t_train], axis=0).reshape(1, -1)
+# # print (background_val.shape)
+# shap = ShapKernel(predict_fn=pdp_prob, data=merged_array, feature_names=features_name)
+# shap_local = shap.explain_local(merged_array_test, y_a_test[0:5], name='SHAP')
+# show(shap_local)
