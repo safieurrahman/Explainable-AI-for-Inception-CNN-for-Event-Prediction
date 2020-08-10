@@ -367,16 +367,16 @@ input2 = X_t_train
 # print (X_a_train.shape)
 # print (X_t_train.shape)
 
-merged_array = np.stack([input1,input2], axis=1)
-# input_lime = Concatenate()([input1, input2])
+# merged_array = np.stack([input1,input2], axis=1)
+# # input_lime = Concatenate()([input1, input2])
 
-# # print (merged_array.shape)
-merged_array= merged_array.transpose(0, 2, 1)
-# # merged_array.reshape (6604,13,13)
-print (merged_array.shape)
+# # # print (merged_array.shape)
+# merged_array= merged_array.transpose(0, 2, 1)
+# # # merged_array.reshape (6604,13,13)
+# print (merged_array.shape)
 
-print (X_a_test[0].shape)
-print (X_t_test[0].shape)
+# print (X_a_test[0].shape)
+# print (X_t_test[0].shape)
 
 
 # # print (X_a_test[0])
@@ -524,11 +524,11 @@ def classifier_pred(input_data):
 plt.show()
 
 def pdp_prob(input_data):
-    # print(merged_array_test.shape)
+    print(input_data.shape)
     new_p = input_data[:,0:13]
     new_p1 = input_data[:,13:26]
-    # print (new_p.shape)
-    # print (new_p1.shape)
+    print (new_p.shape)
+    print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
     return preds
 
@@ -541,24 +541,36 @@ from interpret import set_visualize_provider
 
 set_visualize_provider(InlineProvider())
 
+
+print (X_a_train.shape)
 print (X_a_test.shape)
+
+merged_array = np.hstack((X_a_train, X_t_train))
+#merged_array = merged_array.transpose(1,0)
+print(merged_array.shape)
+
 merged_array_test = np.hstack((X_a_test, X_t_test))
+
+merged_array_test_small = np.hstack((X_a_test[0:1], X_t_test[0:1]))
+#merged_array_test_small = merged_array_test_small.transpose(1,0)
+print (merged_array_test_small.shape)
+
 # merged_array_test= merged_array_test.transpose(1,0)
 
 from interpret import set_show_addr, get_show_addr
 
-pdp = PartialDependence(predict_fn=pdp_prob, data=merged_array_test)
-pdp_global = pdp.explain_global(name='Partial Dependence')
-set_show_addr(('127.0.0.1', 7001))
+# pdp = PartialDependence(predict_fn=pdp_prob, data=merged_array_test)
+# pdp_global = pdp.explain_global(name='Partial Dependence')
+# set_show_addr(('127.0.0.1', 7001))
 
-show(pdp_global)
+# show(pdp_global)
 # plt.show()
 
 
 # preserve(pdp_global, 4, file_name='global-age-graph.html')
 
-pdp_global.visualize(0)  # visualizes the 20th featur
-pdp_global.visualize(0).write_html("graph0.html")  # can also pass in a full filepath here
+# pdp_global.visualize(0)  # visualizes the 20th featur
+# pdp_global.visualize(0).write_html("graph0.html")  # can also pass in a full filepath here
 
 # pdp_global.visualize(1).write_html("graph1.html")  # can also pass in a full filepath here
 # pdp_global.visualize(2).write_html("graph2.html")  # can also pass in a full filepath here
@@ -568,16 +580,15 @@ pdp_global.visualize(0).write_html("graph0.html")  # can also pass in a full fil
 
 
 
-# from interpret.blackbox import LimeTabular
-# from interpret import show
+from interpret.blackbox import LimeTabular
 
-# #Blackbox explainers need a predict function, and optionally a dataset
-# lime = LimeTabular(predict_fn=pdp_prob, data=[X_a_train,X_t_train])
+#Blackbox explainers need a predict function, and optionally a dataset
+lime = LimeTabular(predict_fn=pdp_prob, data=merged_array)
 
-# #Pick the instances to explain, optionally pass in labels if you have them
-# lime_local = lime.explain_local([X_a_test[0:1],X_t_test[0:1]], y_a_test[0:1], name='LIME')
 
-# show(lime_local)
+#Pick the instances to explain, optionally pass in labels if you have them
+lime_local = lime.explain_local(merged_array_test_small, y_a_test[0:1], name='LIME')
+lime_local.visualize(0).write_html("lime.html")  # can also pass in a full filepath here
 
 
 # from interpret.blackbox import ShapKernel
