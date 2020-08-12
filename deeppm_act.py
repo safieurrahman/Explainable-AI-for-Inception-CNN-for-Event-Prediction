@@ -29,8 +29,8 @@ import matplotlib.pyplot as plt
 #Imports for Explainabaility Part
 
 import sklearn
-# import lime
-# import lime.lime_tabular
+import lime
+import lime.lime_tabular
 
 from tensorflow.keras.utils import Sequence
 
@@ -472,7 +472,7 @@ def classifier_pred(input_data):
 
 
 
-# import shap
+import shap
 
 # # Too many input data - use a random slice
 # # rather than use the whole training set to estimate expected values, we summarize with
@@ -530,6 +530,7 @@ def pdp_prob(input_data):
     print (new_p.shape)
     print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
+    #preds = np.argmax(preds, axis=1)
     return preds
 
 from interpret.blackbox import PartialDependence
@@ -549,13 +550,17 @@ merged_array = np.hstack((X_a_train, X_t_train))
 #merged_array = merged_array.transpose(1,0)
 print(merged_array.shape)
 
-merged_array_test = np.hstack((X_a_test, X_t_test))
+merged_array_test = np.hstack((X_a_test[0:100], X_t_test[0:100]))
 
-merged_array_test_small = np.hstack((X_a_test[0:1], X_t_test[0:1]))
+merged_array_test_small = np.hstack((X_a_test[0:10], X_t_test[0:10]))
 #merged_array_test_small = merged_array_test_small.transpose(1,0)
 print (merged_array_test_small.shape)
 
 # merged_array_test= merged_array_test.transpose(1,0)
+
+# explainer = lime.lime_tabular.LimeTabularExplainer(training_data=merged_array, training_labels=y_a_train)
+# exp = explainer.explain_instance(merged_array_test_small, pdp_prob)
+# exp.show_in_notebook(show_all=True)
 
 from interpret import set_show_addr, get_show_addr
 
@@ -580,21 +585,34 @@ from interpret import set_show_addr, get_show_addr
 
 
 
-from interpret.blackbox import LimeTabular
+# from interpret.blackbox import LimeTabular
 
-#Blackbox explainers need a predict function, and optionally a dataset
-lime = LimeTabular(predict_fn=pdp_prob, data=merged_array)
-
-
-#Pick the instances to explain, optionally pass in labels if you have them
-lime_local = lime.explain_local(merged_array_test_small, y_a_test[0:1], name='LIME')
-lime_local.visualize(0).write_html("lime.html")  # can also pass in a full filepath here
+# #Blackbox explainers need a predict function, and optionally a dataset
+# lime = LimeTabular(predict_fn=pdp_prob, data=merged_array)
 
 
-# from interpret.blackbox import ShapKernel
+# #Pick the instances to explain, optionally pass in labels if you have them
+# lime_local = lime.explain_local(merged_array_test_small, y_a_test[1:2], name='LIME')
+# lime_local.visualize(0).write_html("lime.html")  # can also pass in a full filepath here
 
-# # background_val = np.median([X_a_train,X_t_train], axis=0).reshape(1, -1)
-# # print (background_val.shape)
-# shap = ShapKernel(predict_fn=pdp_prob, data=merged_array, feature_names=features_name)
-# shap_local = shap.explain_local(merged_array_test, y_a_test[0:5], name='SHAP')
-# show(shap_local)
+
+from interpret.blackbox import ShapKernel
+
+background_val = np.median(merged_array, axis=0).reshape(1, -1) 
+background_val1 = shap.sample(merged_array,300)
+
+
+
+# use Kernel SHAP to explain test set predictions
+explainer = shap.KernelExplainer(pdp_prob, background_val1)
+shap_values = explainer.shap_values(merged_array_test)
+shap.summary_plot(shap_values, merged_array_test, plot_type="bar")
+shap.summary_plot(shap_values, merged_array_test)
+plt.savefig("shaping1.png")
+
+
+
+# explainer = shap.KernelExplainer(pdp_prob, background_val1)
+# shap_values = explainer.shap_values(merged_array_test)
+# shap.dependence_plot(0, shap_values[0], merged_array_test)
+
