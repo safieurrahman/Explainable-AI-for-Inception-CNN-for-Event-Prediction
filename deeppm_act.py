@@ -43,6 +43,10 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import itertools
+
+
 
 
 class DataGenerator(Sequence):
@@ -83,7 +87,6 @@ class DataGenerator(Sequence):
         y_t = np.empty((self.batch_size))
            
                        
-
         # Generate data
         for i, ID in enumerate(indexes):
             # Store sample
@@ -208,6 +211,34 @@ def fit_and_score(params):
     return {'loss': score, 'status': STATUS_OK,  'n_epochs':  len(h.history['loss']), 'n_params':model.count_params(), 'time':end_time - start_time}
 
 
+def classification_matrix(y_a_test, preds_a):
+    cm = confusion_matrix(y_a_test, preds_a)
+    classes = ['0', '1', '2', '3','4','5','6','7'] #specific to dataset used
+    fig = plt.figure(figsize=(10,10))
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Reds)
+    plt.title('Confusion matrix for Classes')
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    normalize = False
+    fmt = '.2f' if normalize else 'd'
+
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                horizontalalignment="center",
+                color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+    plt.savefig('classification_matrix.png')
+    plt.clf()
+    plt.cla()
 
 
 logfile = sys.argv[1]
@@ -310,27 +341,8 @@ for f in range(1):
     outfile.write("\nAccuracy: %f" % accuracy)
     final_accuracy_scores.append(accuracy)
 
-
-
-    # input1 = X_a_train
-    # input2 = X_t_train
-    # merged_array = np.stack([input1,input2], axis=1)
-    # merged_array= merged_array.transpose(0, 2, 1)
-    # feature_names_activities = "Activities"
-    # feature_names_time = "Time Span between Activities"
-    # myList = list()
-    # myList.append(feature_names_activities)
-    # myList.append(feature_names_time)
-    # features_name = np.array(myList)
-    # explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, feature_names = features_name)
-    # X = np.array([X_a_test[0], X_t_test[0]])
-    # exp = explainer.explain_instance(X, classifier_fn = f_wrapper, num_features=2)
-    # exp.show_in_notebook(show_all=True)
-
-    
-
-    
-
+    print(classification_report(y_a_test, preds_a))
+    classification_matrix(y_a_test, preds_a)
 
     outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
     
@@ -349,13 +361,17 @@ print("Final Accuracy score: ", final_accuracy_scores)
 
 # Lining-up the feature names
 
-feature_names_activities = "Activities"
-feature_names_time = "Time Span between Activities"
+# feature_names_activities = "Activities"
+# feature_names_time = "Time Span between Activities"
 
-myList = list()
-myList.append(feature_names_activities)
-myList.append(feature_names_time)
-features_name = np.array(myList)
+features_name = ['Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
+                'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
+
+
+# myList = list()
+# myList.append(feature_names_activities)
+# myList.append(feature_names_time)
+# features_name = np.array(myList)
 print(features_name)
 
 # Create the LIME Explainer
@@ -492,46 +508,37 @@ import shap
 
 # my_plots = plot_partial_dependence(best_model.predict([X_a_train, X_t_train]),merged_array, features=[0,1])
 
-# from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-# import itertools
 
-# print(classification_report(y_a_test, preds_a))
 
-# cm = confusion_matrix(y_a_test, preds_a)
-# classes = ['0', '1', '2', '3','4','5','6','7']
-# fig = plt.figure(figsize=(10,10))
-# plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Reds)
-# plt.title('Confusion matrix for Classes')
-# plt.colorbar()
-# tick_marks = np.arange(len(classes))
 
-# plt.xticks(tick_marks, classes, rotation=45)
-# plt.yticks(tick_marks, classes)
 
-# normalize = False
-# fmt = '.2f' if normalize else 'd'
 
-# thresh = cm.max() / 2.
-# for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-#     plt.text(j, i, format(cm[i, j], fmt),
-#              horizontalalignment="center",
-#              color="white" if cm[i, j] > thresh else "black")
 
-# plt.tight_layout()
-# plt.ylabel('True label')
-# plt.xlabel('Predicted label')
 
-plt.show()
+    
 
-def pdp_prob(input_data):
-    print(input_data.shape)
+def lime_prob(input_data):
+    # print(input_data.shape)
     new_p = input_data[:,0:13]
     new_p1 = input_data[:,13:26]
-    print (new_p.shape)
-    print (new_p1.shape)
+    # print (new_p.shape)
+    # print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
-    #preds = np.argmax(preds, axis=1)
+    preds = np.argmax(preds, axis=1)
     return preds
+
+
+def shap_prob(input_data):
+    # print(input_data.shape)
+    new_p = input_data[:,0:13]
+    new_p1 = input_data[:,13:26]
+    # print (new_p.shape)
+    # print (new_p1.shape)
+    preds = best_model.predict([new_p,new_p1])
+    return preds
+
+
+
 
 from interpret.blackbox import PartialDependence
 from interpret import show
@@ -542,35 +549,67 @@ from interpret import set_visualize_provider
 
 set_visualize_provider(InlineProvider())
 
-
-print (X_a_train.shape)
-print (X_a_test.shape)
-
-merged_array = np.hstack((X_a_train, X_t_train))
+merged_array_train = np.hstack((X_a_train, X_t_train))
 #merged_array = merged_array.transpose(1,0)
-print(merged_array.shape)
+# print(merged_array.shape)
 
-merged_array_test = np.hstack((X_a_test[0:100], X_t_test[0:100]))
+merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
 
-merged_array_test_small = np.hstack((X_a_test[0:10], X_t_test[0:10]))
+# multiple instances to test with lime
+merged_array_test_lime = np.hstack((X_a_test[0:1], X_t_test[0:1]))
+merged_array_test_lime1 = np.hstack((X_a_test[1:2], X_t_test[1:2]))
+merged_array_test_lime2 = np.hstack((X_a_test[2:3], X_t_test[2:3]))
+
 #merged_array_test_small = merged_array_test_small.transpose(1,0)
-print (merged_array_test_small.shape)
+# print (merged_array_test_small.shape)
 
-# merged_array_test= merged_array_test.transpose(1,0)
+from interpret.blackbox import LimeTabular
 
-# explainer = lime.lime_tabular.LimeTabularExplainer(training_data=merged_array, training_labels=y_a_train)
-# exp = explainer.explain_instance(merged_array_test_small, pdp_prob)
-# exp.show_in_notebook(show_all=True)
+#Blackbox explainers need a predict function, and optionally a dataset
+lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
 
-from interpret import set_show_addr, get_show_addr
+#Pick the instances to explain, optionally pass in labels if you have them
+lime_local = lime.explain_local(merged_array_test_lime, y_a_test[0:1], name='LIME')
+lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[1:2], name='LIME')
+lime_local2 = lime.explain_local(merged_array_test_lime2, y_a_test[2:3], name='LIME')
+
+lime_local.visualize(0).write_html("lime.html")
+lime_local1.visualize(0).write_html("lime1.html") 
+lime_local2.visualize(0).write_html("lime2.html")  
+
+
+# from interpret.blackbox import ShapKernel
+
+#background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
+# background_val = shap.sample(merged_array_train,300)
+
+
+# # use Kernel SHAP to explain test set predictions
+# explainer = shap.KernelExplainer(shap_prob, background_val)
+# shap_values = explainer.shap_values(merged_array_test_shap)
+# shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name, show=False)
+# plt.savefig('Shap_Bar.png',bbox_inches='tight')
+# plt.clf() #Clears the Plot space for next plots 
+# plt.cla()
+
+
+
+
+# SHAP Dependance Plot Implementation
+# explainer = shap.KernelExplainer(pdp_prob, background_val1)
+# shap_values = explainer.shap_values(merged_array_test)
+# shap.dependence_plot(0, shap_values[0], merged_array_test)
+
+
+
+# PDP Implementation
+# from interpret import set_show_addr, get_show_addr
 
 # pdp = PartialDependence(predict_fn=pdp_prob, data=merged_array_test)
 # pdp_global = pdp.explain_global(name='Partial Dependence')
 # set_show_addr(('127.0.0.1', 7001))
-
 # show(pdp_global)
 # plt.show()
-
 
 # preserve(pdp_global, 4, file_name='global-age-graph.html')
 
@@ -582,37 +621,3 @@ from interpret import set_show_addr, get_show_addr
 # pdp_global.visualize(3).write_html("graph3.html")  # can also pass in a full filepath here
 # pdp_global.visualize(13).write_html("graph13.html")  # can also pass in a full filepath here
 # pdp_global.visualize(15).write_html("graph15.html")  # can also pass in a full filepath here
-
-
-
-# from interpret.blackbox import LimeTabular
-
-# #Blackbox explainers need a predict function, and optionally a dataset
-# lime = LimeTabular(predict_fn=pdp_prob, data=merged_array)
-
-
-# #Pick the instances to explain, optionally pass in labels if you have them
-# lime_local = lime.explain_local(merged_array_test_small, y_a_test[1:2], name='LIME')
-# lime_local.visualize(0).write_html("lime.html")  # can also pass in a full filepath here
-
-
-from interpret.blackbox import ShapKernel
-
-background_val = np.median(merged_array, axis=0).reshape(1, -1) 
-background_val1 = shap.sample(merged_array,300)
-
-
-
-# use Kernel SHAP to explain test set predictions
-explainer = shap.KernelExplainer(pdp_prob, background_val1)
-shap_values = explainer.shap_values(merged_array_test)
-shap.summary_plot(shap_values, merged_array_test, plot_type="bar")
-shap.summary_plot(shap_values, merged_array_test)
-plt.savefig("shaping1.png")
-
-
-
-# explainer = shap.KernelExplainer(pdp_prob, background_val1)
-# shap_values = explainer.shap_values(merged_array_test)
-# shap.dependence_plot(0, shap_values[0], merged_array_test)
-
