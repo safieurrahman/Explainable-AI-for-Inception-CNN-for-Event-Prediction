@@ -372,7 +372,7 @@ features_name = ['Activity at Trace Position 13','Activity at Trace Position 12'
 # myList.append(feature_names_activities)
 # myList.append(feature_names_time)
 # features_name = np.array(myList)
-print(features_name)
+# print(features_name)
 
 # Create the LIME Explainer
 
@@ -549,6 +549,9 @@ from interpret import set_visualize_provider
 
 set_visualize_provider(InlineProvider())
 
+# print (y_a_train[1])
+# print (y_a_train[2])
+
 merged_array_train = np.hstack((X_a_train, X_t_train))
 #merged_array = merged_array.transpose(1,0)
 # print(merged_array.shape)
@@ -559,6 +562,7 @@ merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
 merged_array_test_lime = np.hstack((X_a_test[0:1], X_t_test[0:1]))
 merged_array_test_lime1 = np.hstack((X_a_test[1:2], X_t_test[1:2]))
 merged_array_test_lime2 = np.hstack((X_a_test[2:3], X_t_test[2:3]))
+merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
 
 #merged_array_test_small = merged_array_test_small.transpose(1,0)
 # print (merged_array_test_small.shape)
@@ -572,25 +576,27 @@ lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=
 lime_local = lime.explain_local(merged_array_test_lime, y_a_test[0:1], name='LIME')
 lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[1:2], name='LIME')
 lime_local2 = lime.explain_local(merged_array_test_lime2, y_a_test[2:3], name='LIME')
+lime_local3 = lime.explain_local(merged_array_test_lime3, y_a_test[3:4], name='LIME')
 
 lime_local.visualize(0).write_html("lime.html")
 lime_local1.visualize(0).write_html("lime1.html") 
 lime_local2.visualize(0).write_html("lime2.html")  
+lime_local3.visualize(0).write_html("lime3.html")  
 
 
 # from interpret.blackbox import ShapKernel
 
 #background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
-# background_val = shap.sample(merged_array_train,300)
+background_val = shap.sample(merged_array_train,300)
 
 
 # # use Kernel SHAP to explain test set predictions
-# explainer = shap.KernelExplainer(shap_prob, background_val)
-# shap_values = explainer.shap_values(merged_array_test_shap)
-# shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name, show=False)
-# plt.savefig('Shap_Bar.png',bbox_inches='tight')
-# plt.clf() #Clears the Plot space for next plots 
-# plt.cla()
+explainer = shap.KernelExplainer(shap_prob, background_val)
+shap_values = explainer.shap_values(merged_array_test_shap)
+shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name, show=False)
+plt.savefig('Shap_Bar.png',bbox_inches='tight')
+plt.clf() #Clears the Plot space for next plots 
+plt.cla()
 
 
 
