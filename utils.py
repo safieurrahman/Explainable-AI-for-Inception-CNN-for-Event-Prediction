@@ -54,6 +54,7 @@ def load_data(logfile=None):
     timeseqs.append(times)
 
     vocabulary = {key: idx for idx, key in enumerate(vocabulary)}
+    print (vocabulary)
 
     divisor = np.mean([item for sublist in timeseqs for item in sublist]) #average time between events
     numcases += 1
@@ -95,9 +96,16 @@ def load_data(logfile=None):
             seqs += 1
 
             vocab.add(seq[i])
-
-
+            
+    # print (vocab) %activity ID's as in file are added till here
     prefix_sizes = np.array(prefix_sizes)
+
+    print("Prefix Sizes:", prefix_sizes)
+
+    # for i in range(15):
+    #     print ("Prefix size: ", prefix_sizes[i])
+
+
 
     print("Num sequences:", seqs)
 
@@ -109,6 +117,9 @@ def load_data(logfile=None):
     y = np.array(y)
     y_t = np.array(y_t)
 
+
+    for i in range(15):
+        print ("Without pad seq: ", X[i])
 
     y_unique = np.unique(y)
     dict_y = {}

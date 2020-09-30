@@ -280,7 +280,7 @@ final_brier_scores = []
 final_accuracy_scores = []
 final_mae_scores = []
 final_mse_scores = []
-#for f in range(3): #to run for once rather than 3 and averaging the output returns
+#for f in range(3): #to run for once rather than 3 and averaging the output returns //k fold cross validation
 for f in range(1):    
     print("Fold", f)
     outfile.write("\nFold: %d" % f)
@@ -560,9 +560,26 @@ merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
 
 # multiple instances to test with lime
 merged_array_test_lime = np.hstack((X_a_test[0:1], X_t_test[0:1]))
-merged_array_test_lime1 = np.hstack((X_a_test[1:2], X_t_test[1:2]))
-merged_array_test_lime2 = np.hstack((X_a_test[2:3], X_t_test[2:3]))
+merged_array_test_lime1 = np.hstack((X_a_test[15:16], X_t_test[15:16]))
+merged_array_test_lime2 = np.hstack((X_a_test[27:28], X_t_test[27:28]))
 merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
+
+
+for i in range(15):
+    print ("Sample is this: ", X_a[i:i+1], X_t[i:i+1])
+    print ("Ground truth is this: ", np.argmax(y_a[i:i+1], axis=1))
+    pred = best_model.predict([X_a[i:i+1], X_t[i:i+1]])
+    pred = np.argmax(pred, axis=1)
+    print ("Predicted is this: ", pred)
+
+print (X_a[0:15], X_t[0:15])
+
+# print (X_a_test[15:16], X_t_test[15:16])
+
+# print (y_a_test[0:1])
+# print (y_a_test[15:16])
+
+
 
 #merged_array_test_small = merged_array_test_small.transpose(1,0)
 # print (merged_array_test_small.shape)
@@ -574,8 +591,8 @@ lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=
 
 #Pick the instances to explain, optionally pass in labels if you have them
 lime_local = lime.explain_local(merged_array_test_lime, y_a_test[0:1], name='LIME')
-lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[1:2], name='LIME')
-lime_local2 = lime.explain_local(merged_array_test_lime2, y_a_test[2:3], name='LIME')
+lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[15:16], name='LIME')
+lime_local2 = lime.explain_local(merged_array_test_lime2, y_a_test[27:28], name='LIME')
 lime_local3 = lime.explain_local(merged_array_test_lime3, y_a_test[3:4], name='LIME')
 
 lime_local.visualize(0).write_html("lime.html")
@@ -590,14 +607,17 @@ lime_local3.visualize(0).write_html("lime3.html")
 background_val = shap.sample(merged_array_train,300)
 
 
-# # use Kernel SHAP to explain test set predictions
-explainer = shap.KernelExplainer(shap_prob, background_val)
-shap_values = explainer.shap_values(merged_array_test_shap)
-shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name, show=False)
-plt.savefig('Shap_Bar.png',bbox_inches='tight')
-plt.clf() #Clears the Plot space for next plots 
-plt.cla()
 
+
+
+
+# # use Kernel SHAP to explain test set predictions
+# explainer = shap.KernelExplainer(shap_prob, background_val)
+# shap_values = explainer.shap_values(merged_array_test_shap)
+# shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name, show=False)
+# plt.savefig('Shap_Bar.png',bbox_inches='tight')
+# plt.clf() #Clears the Plot space for next plots 
+# plt.cla()
 
 
 
