@@ -256,7 +256,8 @@ outfile.write("Starting time: %s\n" % current_time)
  max_length,
  n_classes,
  divisor,
- prefix_sizes) = load_data(logfile)
+ prefix_sizes,
+ vocabulary) = load_data(logfile)
 
 emb_size = (vocab_size + 1 ) // 2 # --> ceil(vocab_size/2)
 
@@ -606,6 +607,7 @@ lime_local3.visualize(0).write_html("lime3.html")
 #background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
 background_val = shap.sample(merged_array_train,300)
 
+print (vocabulary) #Getting the vocabulary hence
 
 
 

@@ -54,7 +54,6 @@ def load_data(logfile=None):
     timeseqs.append(times)
 
     vocabulary = {key: idx for idx, key in enumerate(vocabulary)}
-    print (vocabulary)
 
     divisor = np.mean([item for sublist in timeseqs for item in sublist]) #average time between events
     numcases += 1
@@ -136,4 +135,4 @@ def load_data(logfile=None):
     padded_X = pad_sequences(X, maxlen=max_length, padding='pre', dtype='float64')
     padded_X1 = pad_sequences(X1, maxlen=max_length, padding='pre', dtype='float64')
 
-    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes)
+    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary)
