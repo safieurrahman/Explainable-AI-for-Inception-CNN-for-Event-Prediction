@@ -365,8 +365,12 @@ print("Final Accuracy score: ", final_accuracy_scores)
 # feature_names_activities = "Activities"
 # feature_names_time = "Time Span between Activities"
 
-features_name = ['Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
-                'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
+# features_name_helpd = ['Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
+#                 'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
+
+
+features_name = ['Activity at Trace Position 14', 'Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
+                'Time Corresponding to ATP 1', 'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
 
 
 # myList = list()
@@ -512,16 +516,12 @@ import shap
 
 
 
-
-
-
-
     
 
 def lime_prob(input_data):
     # print(input_data.shape)
-    new_p = input_data[:,0:13]
-    new_p1 = input_data[:,13:26]
+    new_p = input_data[:,0:14]
+    new_p1 = input_data[:,14:28]
     # print (new_p.shape)
     # print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
@@ -531,8 +531,8 @@ def lime_prob(input_data):
 
 def shap_prob(input_data):
     # print(input_data.shape)
-    new_p = input_data[:,0:13]
-    new_p1 = input_data[:,13:26]
+    new_p = input_data[:,0:14]
+    new_p1 = input_data[:,14:28]
     # print (new_p.shape)
     # print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
@@ -566,14 +566,38 @@ merged_array_test_lime2 = np.hstack((X_a_test[27:28], X_t_test[27:28]))
 merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
 
 
-for i in range(15):
-    print ("Sample is this: ", X_a[i:i+1], X_t[i:i+1])
-    print ("Ground truth is this: ", np.argmax(y_a[i:i+1], axis=1))
-    pred = best_model.predict([X_a[i:i+1], X_t[i:i+1]])
-    pred = np.argmax(pred, axis=1)
-    print ("Predicted is this: ", pred)
 
-print (X_a[0:15], X_t[0:15])
+# Making categorical feature array
+
+
+# See replacement for pad 0 as it contradicts with activity with 0 label
+
+
+categorical_features_name=[]
+
+for i in range(14):
+    for name, index in vocabulary.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
+        if index == X_a[0:1][0][i]:
+            categorical_features_name.insert(i, name)
+
+print (categorical_features_name)
+
+print (X_a[0:1])
+print (X_a[0:1][0][12])
+
+#Next, merge with t array, also see dynamically creating features for variable length trace
+
+#Testing purpose
+
+# for i in range(15):
+#     print ("Sample is this: ", X_a[i:i+1], X_t[i:i+1])
+#     print ("Ground truth is this: ", np.argmax(y_a[i:i+1], axis=1))
+#     pred = best_model.predict([X_a[i:i+1], X_t[i:i+1]])
+#     pred = np.argmax(pred, axis=1)
+#     print ("Predicted is this: ", pred)
+
+    
+
 
 # print (X_a_test[15:16], X_t_test[15:16])
 

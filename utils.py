@@ -11,7 +11,8 @@ def load_data(logfile=None):
     vocabulary = set()
 
     csvfile = open(logfile, 'r')
-    logreader = csv.reader(csvfile, delimiter=',')
+    logreader = csv.reader(csvfile, delimiter=';')
+    # logreader = csv.reader(csvfile, delimiter=',') # For Helpdesk
     next(logreader, None)  # skip the headers
 
     lastcase = '' 
@@ -27,7 +28,8 @@ def load_data(logfile=None):
 
     for row in logreader:
         #t = datetime.strptime(row[2], "%Y/%m/%d %H:%M:%S.%f") #Commented '.%f' for Helpdesk Dataset
-        t = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S")
+        # t = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S") # For Helpdesk Dataset
+        t = datetime.strptime(row[2], "%d.%m.%Y-%H:%M:%S")
         if row[0]!=lastcase:  #'lastcase' is to save the last executed case for the loop
             casestarttime = t
             lasteventtime = t
@@ -98,13 +100,7 @@ def load_data(logfile=None):
             
     # print (vocab) %activity ID's as in file are added till here
     prefix_sizes = np.array(prefix_sizes)
-
-    print("Prefix Sizes:", prefix_sizes)
-
-    # for i in range(15):
-    #     print ("Prefix size: ", prefix_sizes[i])
-
-
+    # print("Prefix Sizes:", prefix_sizes)
 
     print("Num sequences:", seqs)
 
