@@ -257,7 +257,8 @@ outfile.write("Starting time: %s\n" % current_time)
  n_classes,
  divisor,
  prefix_sizes,
- vocabulary) = load_data(logfile)
+ vocabulary,
+ padded_features) = load_data(logfile)
 
 emb_size = (vocab_size + 1 ) // 2 # --> ceil(vocab_size/2)
 
@@ -573,17 +574,13 @@ merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
 # See replacement for pad 0 as it contradicts with activity with 0 label
 
 
-categorical_features_name=[]
+print (X_a[0:15])
+print (padded_features[0:15])
 
-for i in range(14):
-    for name, index in vocabulary.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
-        if index == X_a[0:1][0][i]:
-            categorical_features_name.insert(i, name)
 
-print (categorical_features_name)
 
-print (X_a[0:1])
-print (X_a[0:1][0][12])
+
+
 
 #Next, merge with t array, also see dynamically creating features for variable length trace
 

@@ -1,4 +1,3 @@
-
 def load_data(logfile=None):
 
     import datetime
@@ -12,7 +11,7 @@ def load_data(logfile=None):
 
     csvfile = open(logfile, 'r')
     logreader = csv.reader(csvfile, delimiter=';')
-    # logreader = csv.reader(csvfile, delimiter=',') # For Helpdesk
+    # logreader = csv.reader(csvfile, delimiter=',') # For Helpdesk, BPI12
     next(logreader, None)  # skip the headers
 
     lastcase = '' 
@@ -27,7 +26,7 @@ def load_data(logfile=None):
     max_length = 0
 
     for row in logreader:
-        #t = datetime.strptime(row[2], "%Y/%m/%d %H:%M:%S.%f") #Commented '.%f' for Helpdesk Dataset
+        #t = datetime.strptime(row[2], "%Y/%m/%d %H:%M:%S.%f") # For BPI12 Dataset
         # t = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S") # For Helpdesk Dataset
         t = datetime.strptime(row[2], "%d.%m.%Y-%H:%M:%S")
         if row[0]!=lastcase:  #'lastcase' is to save the last executed case for the loop
@@ -70,6 +69,8 @@ def load_data(logfile=None):
     y = []
     y_t = []
 
+    categorical_features_name = []
+
     max_length = 0
     prefix_sizes = []
     seqs = 0
@@ -88,6 +89,17 @@ def load_data(logfile=None):
             if len(code)>max_length:
                 max_length = len(code)
             X.append(code[:])
+
+            # Building Activity Names from Index for Explainability part
+            sub_feature = []
+            for j in code[:]:
+                
+                for name, index in vocabulary.items():
+                    if index == j:
+                        sub_feature.append(name)   
+            
+            categorical_features_name.append(sub_feature)
+
             X1.append(code1[:])
             y.append(vocabulary[seq[i]])
             y_t.append(time[i]/divisor)
@@ -98,9 +110,7 @@ def load_data(logfile=None):
 
             vocab.add(seq[i])
             
-    # print (vocab) %activity ID's as in file are added till here
     prefix_sizes = np.array(prefix_sizes)
-    # print("Prefix Sizes:", prefix_sizes)
 
     print("Num sequences:", seqs)
 
@@ -111,10 +121,6 @@ def load_data(logfile=None):
     X1 = np.array(X1)
     y = np.array(y)
     y_t = np.array(y_t)
-
-
-    for i in range(15):
-        print ("Without pad seq: ", X[i])
 
     y_unique = np.unique(y)
     dict_y = {}
@@ -127,8 +133,10 @@ def load_data(logfile=None):
     y_unique = np.unique(y, return_counts=True)
     print("Classes: ", y_unique)
     n_classes = y_unique[0].shape[0]
+
     # padding
     padded_X = pad_sequences(X, maxlen=max_length, padding='pre', dtype='float64')
     padded_X1 = pad_sequences(X1, maxlen=max_length, padding='pre', dtype='float64')
+    padded_features = pad_sequences(categorical_features_name, maxlen=max_length, padding='pre', dtype=object, value="Zero Padded Feature") #Padding feature name for Padded feature
 
-    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary)
+    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, padded_features)
