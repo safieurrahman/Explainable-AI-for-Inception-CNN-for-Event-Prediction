@@ -371,11 +371,10 @@ print("Final Accuracy score: ", final_accuracy_scores)
 #                 'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
 
 
-features_name = ['Activity at Trace Position 14', 'Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
-                'Time Corresponding to ATP 1', 'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
+# features_name = ['Activity at Trace Position 14', 'Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
+#                 'Time Corresponding to ATP 1', 'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
 
-print (features_name)
-
+# print (features_name)
 
 temp = np.concatenate((padded_features[0:1], padded_features_time[0:1]), axis=None)
 temp1 = list (temp)
@@ -568,7 +567,7 @@ merged_array_train = np.hstack((X_a_train, X_t_train))
 merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
 
 # multiple instances to test with lime
-merged_array_test_lime = np.hstack((X_a_test[0:1], X_t_test[0:1]))
+merged_array_test_lime = np.hstack((X_a[0:1], X_t[0:1]))
 merged_array_test_lime1 = np.hstack((X_a_test[15:16], X_t_test[15:16]))
 merged_array_test_lime2 = np.hstack((X_a_test[27:28], X_t_test[27:28]))
 merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
@@ -587,10 +586,8 @@ merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
     
 
 
-# print (X_a_test[15:16], X_t_test[15:16])
-
-# print (y_a_test[0:1])
-# print (y_a_test[15:16])
+print (X_a[0:1])
+print (y_a[0:1])
 
 
 
@@ -602,8 +599,10 @@ from interpret.blackbox import LimeTabular
 #Blackbox explainers need a predict function, and optionally a dataset
 lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=temp1)
 
+
+y_a = np.argmax(y_a, axis=1)
 #Pick the instances to explain, optionally pass in labels if you have them
-lime_local = lime.explain_local(merged_array_test_lime, y_a_test[0:1], name='LIME')
+lime_local = lime.explain_local(merged_array_test_lime, y_a[0:1], name='LIME')
 
 # lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
 # lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[15:16], name='LIME1')
@@ -626,6 +625,11 @@ lime_local.visualize(0).write_html("lime.html")
 background_val = shap.sample(merged_array_train,300)
 
 print (vocabulary) #Getting the vocabulary hence
+
+
+print (X_a[0:15])
+print (y_a[0:15])
+
 
 
 

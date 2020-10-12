@@ -55,6 +55,7 @@ def load_data(logfile=None):
     timeseqs.append(times)
 
     vocabulary = {key: idx for idx, key in enumerate(vocabulary)}
+    print (vocabulary)
 
     divisor = np.mean([item for sublist in timeseqs for item in sublist]) #average time between events
     numcases += 1
@@ -90,6 +91,10 @@ def load_data(logfile=None):
             if len(code)>max_length:
                 max_length = len(code)
             X.append(code[:])
+            X1.append(code1[:])
+            y.append(vocabulary[seq[i]])
+            y_t.append(time[i]/divisor)
+
 
             # Building Activity Names and Time from Index for Explainability part
             sub_feature_name = []
@@ -103,10 +108,7 @@ def load_data(logfile=None):
 
             categorical_features_name.append(sub_feature_name)
             categorical_features_time.append(sub_feature_time)
-
-            X1.append(code1[:])
-            y.append(vocabulary[seq[i]])
-            y_t.append(time[i]/divisor)
+            
 
             code.append(vocabulary[seq[i]])
             code1.append(np.log(time[i]+1))
