@@ -258,7 +258,8 @@ outfile.write("Starting time: %s\n" % current_time)
  divisor,
  prefix_sizes,
  vocabulary,
- padded_features) = load_data(logfile)
+ padded_features,
+ padded_features_time) = load_data(logfile)
 
 emb_size = (vocab_size + 1 ) // 2 # --> ceil(vocab_size/2)
 
@@ -373,10 +374,16 @@ print("Final Accuracy score: ", final_accuracy_scores)
 features_name = ['Activity at Trace Position 14', 'Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
                 'Time Corresponding to ATP 1', 'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
 
+print (features_name)
+
+
+temp = np.concatenate((padded_features[0:1], padded_features_time[0:1]), axis=None)
+temp1 = list (temp)
+print (temp1)
 
 # myList = list()
-# myList.append(feature_names_activities)
-# myList.append(feature_names_time)
+# myList.append(padded_features[0:1])
+# myList.append(padded_features_time[0:1])
 # features_name = np.array(myList)
 # print(features_name)
 
@@ -566,22 +573,6 @@ merged_array_test_lime1 = np.hstack((X_a_test[15:16], X_t_test[15:16]))
 merged_array_test_lime2 = np.hstack((X_a_test[27:28], X_t_test[27:28]))
 merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
 
-
-
-# Making categorical feature array
-
-
-# See replacement for pad 0 as it contradicts with activity with 0 label
-
-
-print (X_a[0:15])
-print (padded_features[0:15])
-
-
-
-
-
-
 #Next, merge with t array, also see dynamically creating features for variable length trace
 
 #Testing purpose
@@ -609,18 +600,24 @@ print (padded_features[0:15])
 from interpret.blackbox import LimeTabular
 
 #Blackbox explainers need a predict function, and optionally a dataset
-lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
+lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=temp1)
 
 #Pick the instances to explain, optionally pass in labels if you have them
 lime_local = lime.explain_local(merged_array_test_lime, y_a_test[0:1], name='LIME')
-lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[15:16], name='LIME')
-lime_local2 = lime.explain_local(merged_array_test_lime2, y_a_test[27:28], name='LIME')
-lime_local3 = lime.explain_local(merged_array_test_lime3, y_a_test[3:4], name='LIME')
+
+# lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
+# lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[15:16], name='LIME1')
+
+# lime2 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
+# lime_local2 = lime.explain_local(merged_array_test_lime2, y_a_test[27:28], name='LIME2')
+
+# lime3 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
+# lime_local3 = lime.explain_local(merged_array_test_lime3, y_a_test[3:4], name='LIME3')
 
 lime_local.visualize(0).write_html("lime.html")
-lime_local1.visualize(0).write_html("lime1.html") 
-lime_local2.visualize(0).write_html("lime2.html")  
-lime_local3.visualize(0).write_html("lime3.html")  
+# lime_local1.visualize(0).write_html("lime1.html") 
+# lime_local2.visualize(0).write_html("lime2.html")  
+# lime_local3.visualize(0).write_html("lime3.html")  
 
 
 # from interpret.blackbox import ShapKernel
