@@ -90,25 +90,25 @@ def load_data(logfile=None):
 
             if len(code)>max_length:
                 max_length = len(code)
-            X.append(code[:])
-            X1.append(code1[:])
-            y.append(vocabulary[seq[i]])
-            y_t.append(time[i]/divisor)
-
 
             # Building Activity Names and Time from Index for Explainability part
             sub_feature_name = []
             sub_feature_time = []
+            vocabulary_clone = vocabulary
             for j in code[:]:
                 
-                for name, index in vocabulary.items():
+                for name, index in vocabulary_clone.items():
                     if index == j:
                         sub_feature_name.append(name)
                         sub_feature_time.append("Time corresponding to "+name)
 
             categorical_features_name.append(sub_feature_name)
             categorical_features_time.append(sub_feature_time)
-            
+
+            X.append(code[:])
+            X1.append(code1[:])
+            y.append(vocabulary[seq[i]])
+            y_t.append(time[i]/divisor)
 
             code.append(vocabulary[seq[i]])
             code1.append(np.log(time[i]+1))
@@ -141,6 +141,21 @@ def load_data(logfile=None):
     y_unique = np.unique(y, return_counts=True)
     print("Classes: ", y_unique)
     n_classes = y_unique[0].shape[0]
+
+    print (dict_y)
+
+    # Establishing vocabulary for classes by removing non-predicatable class from vocabulary
+    rebel = int
+
+    for key,value in enumerate(dict_y):
+        print (key, value)
+        if (key!=value):
+            rebel = key
+            break
+
+    for name in vocabulary_clone.copy():
+        if (vocabulary_clone[name] == rebel):
+            del vocabulary_clone[name]
 
     # padding
     padded_X = pad_sequences(X, maxlen=max_length, padding='pre', dtype='float64')
