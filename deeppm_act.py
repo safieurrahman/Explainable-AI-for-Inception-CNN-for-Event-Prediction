@@ -377,9 +377,13 @@ print("Final Accuracy score: ", final_accuracy_scores)
 
 # print (features_name)
 
-temp = np.concatenate((padded_features[1:2], padded_features_time[1:2]), axis=None)
-temp1 = list (temp)
-print (temp1)
+
+def make_features(i,j):
+    temp = []
+    temp = np.concatenate((padded_features[i:j], padded_features_time[i:j]), axis=None)
+    temp1 = list (temp)
+    print (temp1)
+    return temp1
 
 # myList = list()
 # myList.append(padded_features[0:1])
@@ -388,143 +392,6 @@ print (temp1)
 # print(features_name)
 
 # Create the LIME Explainer
-
-
-input1 = X_a_train
-input2 = X_t_train
-
-# print (X_a_train.shape)
-# print (X_t_train.shape)
-
-# merged_array = np.stack([input1,input2], axis=1)
-# # input_lime = Concatenate()([input1, input2])
-
-# # # print (merged_array.shape)
-# merged_array= merged_array.transpose(0, 2, 1)
-# # # merged_array.reshape (6604,13,13)
-# print (merged_array.shape)
-
-# print (X_a_test[0].shape)
-# print (X_t_test[0].shape)
-
-
-# # print (X_a_test[0])
-# # print (X_t_test[0])
-
-# # print (shap_input)
-
-# def f_wrapper(X):
-#     #input_list = X.tolist()
-#     #print input_list
-#     return best_model.predict(X).flatten()
-
-    
-# explainer = lime.lime_tabular.RecurrentTabularExplainer(training_data=merged_array, training_labels=y_a_train, feature_names = features_name)
-
-# merged_array_test = np.stack([X_a_test[0:100], X_t_test[0:100]], axis=1)
-# merged_array_test = merged_array_test.transpose(0, 2, 1)
-# print(merged_array_test.shape)
-
-# merged_array_test = np.hstack((X_a_test[0:100], X_t_test[0:100]))
-# #merged_array_test= merged_array_test.transpose(1,0)
-# print(merged_array_test.shape)
-
-# print (X_a_test[0:1].shape)
-# print (X_t_test[0:1].shape)
-
-# A =  best_model.predict((X_a_test[0:1],X_t_test[0:1]))
-# print (A)
-# print (np.argmax(A))
-
-
-# merged_array_test1= np.concatenate((X_a_test[0], X_t_test[0]))
-# print(merged_array_test1.shape)
-
-# X = np.array([X_a_test[0:1], X_t_test[0:1]])
-
-# print (X.shape)
-# input_list = X.tolist()
-# print (input_list)
-
-
-def classifier_pred(input_data):
-    print (input_data.shape)
-    act = input_data[:,0:13]
-    tim = input_data[:,13:26]
-    print (act.shape)
-    print (tim.shape)
-    preds = best_model.predict([act,tim])
-    print (preds)
-    return preds
-
-# exp = explainer.explain_instance(merged_array_test, classifier_pred, num_features=2)
-# exp.show_in_notebook(show_all=True)
-
-
-# hiya = best_model.get_weights()
-# print (hiya)
-
-# import shap
-
-# # print the JS visualization code to the notebook
-# shap.initjs()
-
-# # we use the first 100 training examples as our background dataset to integrate over
-# explainer = shap.DeepExplainer(best_model, data=[X_a_train, X_t_train])
-
-# print(X_a_test[0])
-# print(X_t_test[0])
-# temp = np.reshape(X_t_test[0],X_a_test[0].shape)
-# print(temp)
-
-
-# shap_values = explainer.shap_values([X_a_test[0:1], X_t_test[0:1]])
-
-# # explain the first 10 predictions
-# # explaining each prediction requires 2 * background dataset size runs
-# #shap_values = explainer.shap_values([X_a_test, X_t_test])
-# shap.summary_plot(shap_values, [X_a_test[0:1], X_t_test[0:1]] , feature_names=features_name, plot_type="bar")
-
-
-# # # perm = PermutationImportance(best_model, scoring='accuracy', random_state=1).fit([X_a_train, X_t_train], y_a_train)
-# # # eli5.show_weights(perm, feature_names = features_name)
-
-
-# # # from alibi.explainers import KernelShap
-# # # import skimage
-
-# # # predict_fn = lambda x: clf.predict_proba(x)
-# # # explainer = KernelShap(classifier_pred, link='logit', feature_names=features_name)
-
-# # # explainer.fit(merged_array_test)
-# # # explanation = explainer.explain(X)
-
-
-
-import shap
-
-# # Too many input data - use a random slice
-# # rather than use the whole training set to estimate expected values, we summarize with
-# # a set of weighted kmeans, each weighted by the number of points they represent.
-# # X_train_summary = shap.kmeans([X_a_train,X_t_train], 20)
-
-# # Compute Shap values
-# explainer = shap.DeepExplainer(best_model,[X_a_train, X_t_train])
-
-# # Make plot with combined shap values
-# # The training set is too big so let's sample it. We get enough point to draw conclusions
-# # X_train_sample = [X_a_train,X_t_train].sample(400)
-# shap_values  = explainer.shap_values([X_a_test[0:10], X_t_test[0:10]])
-# shap.summary_plot(shap_values, [X_a_test[0:10], X_t_test[0:10]] )
-
-# from sklearn.inspection import plot_partial_dependence
-
-# my_plots = plot_partial_dependence(best_model.predict([X_a_train, X_t_train]),merged_array, features=[0,1])
-
-
-
-
-    
 
 def lime_prob(input_data):
     # print(input_data.shape)
@@ -547,8 +414,6 @@ def shap_prob(input_data):
     return preds
 
 
-
-
 from interpret.blackbox import PartialDependence
 from interpret import show
 
@@ -558,20 +423,14 @@ from interpret import set_visualize_provider
 
 set_visualize_provider(InlineProvider())
 
-# print (y_a_train[1])
-# print (y_a_train[2])
-
-merged_array_train = np.hstack((X_a_train, X_t_train))
+merged_array_train = np.hstack((X_a, X_t))
 #merged_array = merged_array.transpose(1,0)
 # print(merged_array.shape)
 
 merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
 
-# multiple instances to test with lime
-merged_array_test_lime = np.hstack((X_a[1:2], X_t[1:2]))
-merged_array_test_lime1 = np.hstack((X_a_test[15:16], X_t_test[15:16]))
-merged_array_test_lime2 = np.hstack((X_a_test[27:28], X_t_test[27:28]))
-merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
+
+# merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
 
 #Next, merge with t array, also see dynamically creating features for variable length trace
 
@@ -584,26 +443,19 @@ merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
 #     pred = np.argmax(pred, axis=1)
 #     print ("Predicted is this: ", pred)
 
-    
-
-
-print (X_a[1:2])
-print (y_a[1:2])
-
-
 
 #merged_array_test_small = merged_array_test_small.transpose(1,0)
 # print (merged_array_test_small.shape)
 
 from interpret.blackbox import LimeTabular
 
-#Blackbox explainers need a predict function, and optionally a dataset
-lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=temp1)
+# #Blackbox explainers need a predict function, and optionally a dataset
+# lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(7,8))
 
 
-y_a = np.argmax(y_a, axis=1)
-#Pick the instances to explain, optionally pass in labels if you have them
-lime_local = lime.explain_local(merged_array_test_lime, y_a[1:2], name='LIME')
+# y_a = np.argmax(y_a, axis=1)
+# #Pick the instances to explain, optionally pass in labels if you have them
+# lime_local = lime.explain_local(merged_array_test_lime, y_a[1:2], name='LIME')
 
 # lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
 # lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[15:16], name='LIME1')
@@ -623,21 +475,54 @@ lime_local = lime.explain_local(merged_array_test_lime, y_a[1:2], name='LIME')
 # from interpret.blackbox import ShapKernel
 
 #background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
-background_val = shap.sample(merged_array_train,300)
+# background_val = shap.sample(merged_array_train,300)
 
 print (vocabulary) #Getting the vocabulary hence
 print (vocabulary_class)
 
 
+
+
+# fig = plt.figure
+# fig = lime_local.visualize(0)
+# fig.write_html("lime.html")
+
+
+
+
+
+
+
+
+y_a = np.argmax(y_a, axis=1)
+
 print (X_a[7:10])
 print (y_a[7:10])
 
-fig = lime_local.visualize(0)
-fig.write_html("lime.html")
+# Test Case Formulation
+# Test Case 1
+
+# multiple instances to test with lime
+merged_array_test_lime = np.hstack((X_a[7:8], X_t[7:8]))
+merged_array_test_lime1 = np.hstack((X_a[8:9], X_t[8:9]))
+merged_array_test_lime2 = np.hstack((X_a[9:10], X_t[9:10]))
+
+#Using Lime Tabular and applying local explanation with dynamic features
+lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(7,8))
+lime_local = lime.explain_local(merged_array_test_lime, y_a[7:8], name='LIME')
+lime_local.visualize(0).write_html("lime.html")
+
+lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(8,9))
+lime_local1 = lime1.explain_local(merged_array_test_lime1, y_a[8:9], name='LIME1')
+lime_local1.visualize(0).write_html("lime1.html") 
+
+lime2 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(9,10))
+lime_local2 = lime2.explain_local(merged_array_test_lime2, y_a[9:10], name='LIME2')
+lime_local2.visualize(0).write_html("lime2.html") 
 
 
-
-
+# Saving the figures as interactive HTML's
+ 
 
 
 
@@ -656,27 +541,3 @@ fig.write_html("lime.html")
 # shap_values = explainer.shap_values(merged_array_test)
 # shap.dependence_plot(0, shap_values[0], merged_array_test)
 
-
-
-
-
-
-# PDP Implementation
-# from interpret import set_show_addr, get_show_addr
-
-# pdp = PartialDependence(predict_fn=pdp_prob, data=merged_array_test)
-# pdp_global = pdp.explain_global(name='Partial Dependence')
-# set_show_addr(('127.0.0.1', 7001))
-# show(pdp_global)
-# plt.show()
-
-# preserve(pdp_global, 4, file_name='global-age-graph.html')
-
-# pdp_global.visualize(0)  # visualizes the 20th featur
-# pdp_global.visualize(0).write_html("graph0.html")  # can also pass in a full filepath here
-
-# pdp_global.visualize(1).write_html("graph1.html")  # can also pass in a full filepath here
-# pdp_global.visualize(2).write_html("graph2.html")  # can also pass in a full filepath here
-# pdp_global.visualize(3).write_html("graph3.html")  # can also pass in a full filepath here
-# pdp_global.visualize(13).write_html("graph13.html")  # can also pass in a full filepath here
-# pdp_global.visualize(15).write_html("graph15.html")  # can also pass in a full filepath here
