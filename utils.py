@@ -55,8 +55,6 @@ def load_data(logfile=None):
     timeseqs.append(times)
 
     vocabulary = {key: idx for idx, key in enumerate(vocabulary)}
-    print (vocabulary)
-
     divisor = np.mean([item for sublist in timeseqs for item in sublist]) #average time between events
     numcases += 1
     print("Num cases: ", numcases)
@@ -94,7 +92,7 @@ def load_data(logfile=None):
             # Building Activity Names and Time from Index for Explainability part
             sub_feature_name = []
             sub_feature_time = []
-            vocabulary_clone = vocabulary
+            vocabulary_clone = vocabulary.copy()
             for j in code[:]:
                 
                 for name, index in vocabulary_clone.items():
@@ -142,20 +140,24 @@ def load_data(logfile=None):
     print("Classes: ", y_unique)
     n_classes = y_unique[0].shape[0]
 
-    print (dict_y)
-
-    # Establishing vocabulary for classes by removing non-predicatable class from vocabulary
+    # Establishing vocabulary for classes by removing non-predicatable class from vocabulary (For Helpdesk Dataset)
     rebel = int
+    vocabulary_class = {}
 
+    # Finding where the class occurs which is not to be predicted
     for key,value in enumerate(dict_y):
-        print (key, value)
         if (key!=value):
             rebel = key
             break
 
+    # deleting that class from dictionary
     for name in vocabulary_clone.copy():
         if (vocabulary_clone[name] == rebel):
-            del vocabulary_clone[name]
+            vocabulary_clone.pop(name)
+
+    vocabulary_class = vocabulary_clone.copy()
+    for index,name in enumerate(vocabulary_class.copy()):
+            vocabulary_class[name] = index
 
     # padding
     padded_X = pad_sequences(X, maxlen=max_length, padding='pre', dtype='float64')
@@ -163,4 +165,4 @@ def load_data(logfile=None):
     padded_features = pad_sequences(categorical_features_name, maxlen=max_length, padding='pre', dtype=object, value="Zero Padded Feature") #Padding feature name for Padded feature
     padded_features_time = pad_sequences(categorical_features_time, maxlen=max_length, padding='pre', dtype=object, value="Zero Padded Feature") #Padding feature time for Padded feature
 
-    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, padded_features, padded_features_time)
+    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, vocabulary_class, padded_features, padded_features_time)

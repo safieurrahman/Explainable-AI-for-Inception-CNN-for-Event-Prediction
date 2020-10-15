@@ -24,6 +24,7 @@ from time import perf_counter
 import time
 
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 
 #Imports for Explainabaility Part
@@ -258,6 +259,7 @@ outfile.write("Starting time: %s\n" % current_time)
  divisor,
  prefix_sizes,
  vocabulary,
+ vocabulary_class,
  padded_features,
  padded_features_time) = load_data(logfile)
 
@@ -276,7 +278,6 @@ space = {'input_length':max_length, 'vocab_size':vocab_size, 'n_classes':n_class
          'n_modules':hp.choice('n_modules', [1,2,3]),
          'batch_size': hp.choice('batch_size', [9,10]),
          'learning_rate': hp.loguniform("learning_rate", np.log(0.00001), np.log(0.01))}
-
 
 
 final_brier_scores = []
@@ -376,7 +377,7 @@ print("Final Accuracy score: ", final_accuracy_scores)
 
 # print (features_name)
 
-temp = np.concatenate((padded_features[0:1], padded_features_time[0:1]), axis=None)
+temp = np.concatenate((padded_features[1:2], padded_features_time[1:2]), axis=None)
 temp1 = list (temp)
 print (temp1)
 
@@ -567,7 +568,7 @@ merged_array_train = np.hstack((X_a_train, X_t_train))
 merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
 
 # multiple instances to test with lime
-merged_array_test_lime = np.hstack((X_a[0:1], X_t[0:1]))
+merged_array_test_lime = np.hstack((X_a[1:2], X_t[1:2]))
 merged_array_test_lime1 = np.hstack((X_a_test[15:16], X_t_test[15:16]))
 merged_array_test_lime2 = np.hstack((X_a_test[27:28], X_t_test[27:28]))
 merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
@@ -586,8 +587,8 @@ merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
     
 
 
-print (X_a[0:1])
-print (y_a[0:1])
+print (X_a[1:2])
+print (y_a[1:2])
 
 
 
@@ -602,7 +603,7 @@ lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=
 
 y_a = np.argmax(y_a, axis=1)
 #Pick the instances to explain, optionally pass in labels if you have them
-lime_local = lime.explain_local(merged_array_test_lime, y_a[0:1], name='LIME')
+lime_local = lime.explain_local(merged_array_test_lime, y_a[1:2], name='LIME')
 
 # lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
 # lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[15:16], name='LIME1')
@@ -613,7 +614,7 @@ lime_local = lime.explain_local(merged_array_test_lime, y_a[0:1], name='LIME')
 # lime3 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
 # lime_local3 = lime.explain_local(merged_array_test_lime3, y_a_test[3:4], name='LIME3')
 
-lime_local.visualize(0).write_html("lime.html")
+
 # lime_local1.visualize(0).write_html("lime1.html") 
 # lime_local2.visualize(0).write_html("lime2.html")  
 # lime_local3.visualize(0).write_html("lime3.html")  
@@ -625,10 +626,15 @@ lime_local.visualize(0).write_html("lime.html")
 background_val = shap.sample(merged_array_train,300)
 
 print (vocabulary) #Getting the vocabulary hence
+print (vocabulary_class)
 
 
-print (X_a[0:15])
-print (y_a[0:15])
+print (X_a[7:10])
+print (y_a[7:10])
+
+fig = lime_local.visualize(0)
+fig.write_html("lime.html")
+
 
 
 
@@ -649,6 +655,9 @@ print (y_a[0:15])
 # explainer = shap.KernelExplainer(pdp_prob, background_val1)
 # shap_values = explainer.shap_values(merged_array_test)
 # shap.dependence_plot(0, shap_values[0], merged_array_test)
+
+
+
 
 
 
