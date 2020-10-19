@@ -496,8 +496,10 @@ print (vocabulary_class)
 
 y_a = np.argmax(y_a, axis=1)
 
-print (X_a[7:10])
-print (y_a[7:10])
+print (X_a[7:20])
+print (y_a[7:20])
+
+print (X_a[5475:5481])
 
 # Test Case Formulation
 # Test Case 1
@@ -522,9 +524,39 @@ lime_local2.visualize(0).write_html("lime2.html")
 
 
 # Saving the figures as interactive HTML's
+
+
+
+# Test Case 2
+
+# multiple instances to test with lime
+merged_array_test_lime10 = np.hstack((X_a[5475:5476], X_t[5475:5476]))
+merged_array_test_lime11 = np.hstack((X_a[5476:5477], X_t[5476:5477]))
+merged_array_test_lime12 = np.hstack((X_a[5477:5478], X_t[5477:5478]))
+merged_array_test_lime13 = np.hstack((X_a[5478:5479], X_t[5478:5479]))
+merged_array_test_lime14 = np.hstack((X_a[5479:5480], X_t[5479:5480]))
+
+#Using Lime Tabular and applying local explanation with dynamic features
+lime10 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5475,5476))
+lime_local = lime10.explain_local(merged_array_test_lime10, y_a[5475:5476], name='LIME10')
+lime_local.visualize(0).write_html("lime10.html")
+
+lime11 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5476,5477))
+lime_local11 = lime11.explain_local(merged_array_test_lime11, y_a[5476:5477], name='LIME11')
+lime_local11.visualize(0).write_html("lime11.html") 
+
+lime12 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5477,5478))
+lime_local12 = lime12.explain_local(merged_array_test_lime12, y_a[5477:5478], name='LIME12')
+lime_local12.visualize(0).write_html("lime12.html") 
+
+lime13 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5478,5479))
+lime_local3 = lime13.explain_local(merged_array_test_lime13, y_a[5478:5479], name='LIME13')
+lime_local3.visualize(0).write_html("lime13.html") 
+
+lime14 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5479,5480))
+lime_local14 = lime14.explain_local(merged_array_test_lime14, y_a[5479:5480], name='LIME14')
+lime_local14.visualize(0).write_html("lime14.html") 
  
-
-
 
 # # use Kernel SHAP to explain test set predictions
 # explainer = shap.KernelExplainer(shap_prob, background_val)

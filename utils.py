@@ -75,6 +75,9 @@ def load_data(logfile=None):
     prefix_sizes = []
     seqs = 0
     vocab = set()
+
+    count = 0
+
     for seq, time in zip(lines, timeseqs):
         code = []
         code.append(vocabulary[seq[0]])
@@ -115,6 +118,8 @@ def load_data(logfile=None):
             vocab.add(seq[i])
             
     prefix_sizes = np.array(prefix_sizes)
+
+    print (prefix_sizes)
 
     print("Num sequences:", seqs)
     print("Activities: ",vocab )
