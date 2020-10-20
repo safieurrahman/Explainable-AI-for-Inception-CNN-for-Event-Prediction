@@ -386,8 +386,6 @@ def make_features(i,j):
     return temp1
 
 
-make_features(1,4)
-
 # myList = list()
 # myList.append(padded_features[0:1])
 # myList.append(padded_features_time[0:1])
@@ -396,10 +394,12 @@ make_features(1,4)
 
 # Create the LIME Explainer
 
+class_size = len(vocabulary)
+
 def lime_prob(input_data):
     # print(input_data.shape)
-    new_p = input_data[:,0:14]
-    new_p1 = input_data[:,14:28]
+    new_p = input_data[:,0:class_size]
+    new_p1 = input_data[:,class_size:]
     # print (new_p.shape)
     # print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
@@ -409,8 +409,8 @@ def lime_prob(input_data):
 
 def shap_prob(input_data):
     # print(input_data.shape)
-    new_p = input_data[:,0:14]
-    new_p1 = input_data[:,14:28]
+    new_p = input_data[:,0:class_size]
+    new_p1 = input_data[:,class_size:]
     # print (new_p.shape)
     # print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
@@ -563,24 +563,27 @@ print (X_a[5474:5480])
 # lime_local14.visualize(0).write_html("lime14.html") 
 
 
-# Generic Instance Explainability function
+# Generic Instance Explainability Recursive function for traces
 
-trace_start = 5474
-trace_end = 5480
-
-def generate_interpretability(trace_start,j):
+def generate_interpretability(trace_start,trace_end):
     if trace_start == trace_end:
         return 0
     else: 
         plot_name  = str(trace_start)
-        merged_array_test_gen = np.hstack((X_a[trace_start:j], X_t[trace_start:j]))
-        lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,j))
-        lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:j])
+        merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
+        lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
+        lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
         lime_local_gen.visualize(0).write_html(plot_name+".html")
         trace_start = trace_start + 1
-        return generate_interpretability (trace_start, trace_start+1)
+        return generate_interpretability (trace_start, trace_end)
 
-generate_interpretability (trace_start, trace_start+1)
+#Test Case 1
+generate_interpretability (7,10)
+
+#Test Case 2
+generate_interpretability (5474,5480)
+
+
 
 
 
