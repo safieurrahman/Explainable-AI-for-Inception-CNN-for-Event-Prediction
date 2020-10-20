@@ -474,7 +474,7 @@ from interpret.blackbox import LimeTabular
 
 # from interpret.blackbox import ShapKernel
 
-#background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
+# background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
 # background_val = shap.sample(merged_array_train,300)
 
 print (vocabulary) #Getting the vocabulary hence
@@ -499,7 +499,7 @@ y_a = np.argmax(y_a, axis=1)
 print (X_a[7:20])
 print (y_a[7:20])
 
-print (X_a[5475:5481])
+print (X_a[5474:5480])
 
 # Test Case Formulation
 # Test Case 1
@@ -523,20 +523,22 @@ lime_local2 = lime2.explain_local(merged_array_test_lime2, y_a[9:10], name='LIME
 lime_local2.visualize(0).write_html("lime2.html") 
 
 
-# Saving the figures as interactive HTML's
-
-
-
 # Test Case 2
 
 # multiple instances to test with lime
+merged_array_test_lime9 = np.hstack((X_a[5474:5475], X_t[5474:5475]))
 merged_array_test_lime10 = np.hstack((X_a[5475:5476], X_t[5475:5476]))
 merged_array_test_lime11 = np.hstack((X_a[5476:5477], X_t[5476:5477]))
 merged_array_test_lime12 = np.hstack((X_a[5477:5478], X_t[5477:5478]))
 merged_array_test_lime13 = np.hstack((X_a[5478:5479], X_t[5478:5479]))
 merged_array_test_lime14 = np.hstack((X_a[5479:5480], X_t[5479:5480]))
 
+
 #Using Lime Tabular and applying local explanation with dynamic features
+lime9 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5474,5475))
+lime_local9 = lime9.explain_local(merged_array_test_lime9, y_a[5474:5475], name='LIME9')
+lime_local9.visualize(0).write_html("lime9.html") 
+
 lime10 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5475,5476))
 lime_local = lime10.explain_local(merged_array_test_lime10, y_a[5475:5476], name='LIME10')
 lime_local.visualize(0).write_html("lime10.html")
@@ -550,26 +552,24 @@ lime_local12 = lime12.explain_local(merged_array_test_lime12, y_a[5477:5478], na
 lime_local12.visualize(0).write_html("lime12.html") 
 
 lime13 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5478,5479))
-lime_local3 = lime13.explain_local(merged_array_test_lime13, y_a[5478:5479], name='LIME13')
-lime_local3.visualize(0).write_html("lime13.html") 
+lime_local13 = lime13.explain_local(merged_array_test_lime13, y_a[5478:5479], name='LIME13')
+lime_local13.visualize(0).write_html("lime13.html") 
 
 lime14 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5479,5480))
 lime_local14 = lime14.explain_local(merged_array_test_lime14, y_a[5479:5480], name='LIME14')
 lime_local14.visualize(0).write_html("lime14.html") 
- 
+lime_local14.visualize(0)
+
+
+
 
 # # use Kernel SHAP to explain test set predictions
 # explainer = shap.KernelExplainer(shap_prob, background_val)
 # shap_values = explainer.shap_values(merged_array_test_shap)
-# shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name, show=False)
+# shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name(0:10,0:10), show=false)
 # plt.savefig('Shap_Bar.png',bbox_inches='tight')
 # plt.clf() #Clears the Plot space for next plots 
 # plt.cla()
 
 
-
-# SHAP Dependance Plot Implementation
-# explainer = shap.KernelExplainer(pdp_prob, background_val1)
-# shap_values = explainer.shap_values(merged_array_test)
-# shap.dependence_plot(0, shap_values[0], merged_array_test)
 
