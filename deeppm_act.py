@@ -9,6 +9,7 @@ from tensorflow.keras.layers import Input, Concatenate, Conv1D, GlobalAveragePoo
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.utils import Sequence
 
 from utils import load_data
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
@@ -30,25 +31,13 @@ import plotly.express as px
 #Imports for Explainabaility Part
 
 import sklearn
-import lime
-import lime.lime_tabular
-
-from tensorflow.keras.utils import Sequence
-
-
-from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
-import eli5
-from eli5.sklearn import PermutationImportance
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import itertools
 
 import warnings
 warnings.filterwarnings('ignore')
 
-
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-import itertools
-
-
-
+from interpret.blackbox import LimeTabular
 
 class DataGenerator(Sequence):
     def __init__(self, features, labels, batch_size=32, shuffle=True):
@@ -130,9 +119,7 @@ def get_model(input_length=10, n_filters=3, vocab_size=10, n_classes=9, embeddin
     #pool = GlobalAveragePooling1D()(filters_inputs)
     pool = GlobalMaxPooling1D()(filters_inputs)
     #pool = Flatten()(filters_inputs)
-
     #pool = Dense(64, activation='relu')(pool)
-
 
     optimizer = Adam(lr=learning_rate)
 
@@ -214,7 +201,7 @@ def fit_and_score(params):
 
 def classification_matrix(y_a_test, preds_a):
     cm = confusion_matrix(y_a_test, preds_a)
-    classes = ['0', '1', '2', '3','4','5','6','7'] #specific to dataset used
+    classes = ['0', '1', '2', '3','4','5','6','7','8','9','10'], #specific to dataset used
     fig = plt.figure(figsize=(10,10))
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Reds)
     plt.title('Confusion matrix for Classes')
@@ -269,7 +256,6 @@ emb_size = (vocab_size + 1 ) // 2 # --> ceil(vocab_size/2)
 X_t = X_t / np.max(X_t)
 # categorical output
 y_a = to_categorical(y_a)
-
 
 #n_iter = 20 #Commented for faster compilation at the expense of training weights
 n_iter = 1
@@ -358,25 +344,16 @@ print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
 
 outfile.close()
 
-#XAI Part
+################################################################************************#################################################################
+
+#XAI Part Implementation
 
 print("\n\nFinal Brier score: ", final_brier_scores)
 print("Final Accuracy score: ", final_accuracy_scores)
 
-# Lining-up the feature names
-
-# feature_names_activities = "Activities"
-# feature_names_time = "Time Span between Activities"
-
-# features_name_helpd = ['Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
-#                 'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
 
 
-# features_name = ['Activity at Trace Position 14', 'Activity at Trace Position 13','Activity at Trace Position 12','Activity at Trace Position 11','Activity at Trace Position 10','Activity at Trace Position 9','Activity at Trace Position 8','Activity at Trace Position 7','Activity at Trace Position 6','Activity at Trace Position 5','Activity at Trace Position 4','Activity at Trace Position 3','Activity at Trace Position 2','Activity at Trace Position 1',
-#                 'Time Corresponding to ATP 1', 'Time Corresponding to ATP 13','Time Corresponding to ATP 12', 'Time Corresponding to ATP 11', 'Time Corresponding to ATP 10', 'Time Corresponding to ATP 9', 'Time Corresponding to ATP 8', 'Time Corresponding to ATP 7', 'Time Corresponding to ATP 6', 'Time Corresponding to ATP 5', 'Time Corresponding to ATP 4', 'Time Corresponding to ATP 3', 'Time Corresponding to ATP 2', 'Time Corresponding to ATP 1']
-
-# print (features_name)
-
+# Dynamic feature extraction for instances
 
 def make_features(i,j):
     temp = []
@@ -385,57 +362,58 @@ def make_features(i,j):
     print (temp1)
     return temp1
 
-
-# myList = list()
-# myList.append(padded_features[0:1])
-# myList.append(padded_features_time[0:1])
-# features_name = np.array(myList)
-# print(features_name)
-
-# Create the LIME Explainer
+# Parsing the inputs the way LIME Explainer expects
 
 class_size = len(vocabulary)
-
 def lime_prob(input_data):
-    # print(input_data.shape)
     new_p = input_data[:,0:class_size]
     new_p1 = input_data[:,class_size:]
-    # print (new_p.shape)
-    # print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
     preds = np.argmax(preds, axis=1)
     return preds
 
 
 def shap_prob(input_data):
-    # print(input_data.shape)
     new_p = input_data[:,0:class_size]
     new_p1 = input_data[:,class_size:]
-    # print (new_p.shape)
-    # print (new_p1.shape)
     preds = best_model.predict([new_p,new_p1])
     return preds
 
 
-from interpret.blackbox import PartialDependence
-from interpret import show
-
-from interpret import preserve
-from interpret.provider import InlineProvider
-from interpret import set_visualize_provider
-
-set_visualize_provider(InlineProvider())
-
 merged_array_train = np.hstack((X_a, X_t))
-#merged_array = merged_array.transpose(1,0)
-# print(merged_array.shape)
-
-merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
+y_a = np.argmax(y_a, axis=1)
 
 
-# merged_array_test_lime3 = np.hstack((X_a_test[3:4], X_t_test[3:4]))
+print (vocabulary) #Getting the vocabulary hence
+print (vocabulary_class)
 
-#Next, merge with t array, also see dynamically creating features for variable length trace
+print (X_a[7:20])
+print (y_a[7:20])
+print (X_a[5474:5480])
+
+import plotly.express as px
+
+# Generic Instance Explainability Recursive function for traces
+
+def generate_interpretability(trace_start,trace_end):
+    if trace_start == trace_end:
+        return 0
+    else: 
+        plot_name  = str(trace_start)
+        merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
+        lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
+        lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
+        plot = lime_local_gen.visualize(0).update_layout(xaxis_title=vocabulary_class)
+        px = plot
+        plot.write_html(plot_name+".html")
+        trace_start = trace_start + 1
+        return generate_interpretability (trace_start, trace_end)
+
+#Test Case 1
+generate_interpretability (7,10)
+
+#Test Case 2
+generate_interpretability (5474,5480)
 
 #Testing purpose
 
@@ -446,63 +424,6 @@ merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
 #     pred = np.argmax(pred, axis=1)
 #     print ("Predicted is this: ", pred)
 
-
-#merged_array_test_small = merged_array_test_small.transpose(1,0)
-# print (merged_array_test_small.shape)
-
-from interpret.blackbox import LimeTabular
-
-# #Blackbox explainers need a predict function, and optionally a dataset
-# lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(7,8))
-
-
-# y_a = np.argmax(y_a, axis=1)
-# #Pick the instances to explain, optionally pass in labels if you have them
-# lime_local = lime.explain_local(merged_array_test_lime, y_a[1:2], name='LIME')
-
-# lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
-# lime_local1 = lime.explain_local(merged_array_test_lime1, y_a_test[15:16], name='LIME1')
-
-# lime2 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
-# lime_local2 = lime.explain_local(merged_array_test_lime2, y_a_test[27:28], name='LIME2')
-
-# lime3 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=features_name)
-# lime_local3 = lime.explain_local(merged_array_test_lime3, y_a_test[3:4], name='LIME3')
-
-
-# lime_local1.visualize(0).write_html("lime1.html") 
-# lime_local2.visualize(0).write_html("lime2.html")  
-# lime_local3.visualize(0).write_html("lime3.html")  
-
-
-# from interpret.blackbox import ShapKernel
-
-# background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
-# background_val = shap.sample(merged_array_train,300)
-
-print (vocabulary) #Getting the vocabulary hence
-print (vocabulary_class)
-
-
-
-
-# fig = plt.figure
-# fig = lime_local.visualize(0)
-# fig.write_html("lime.html")
-
-
-
-
-
-
-
-
-y_a = np.argmax(y_a, axis=1)
-
-print (X_a[7:20])
-print (y_a[7:20])
-
-print (X_a[5474:5480])
 
 # Test Case Formulation
 # Test Case 1
@@ -563,42 +484,19 @@ print (X_a[5474:5480])
 # lime_local14.visualize(0).write_html("lime14.html") 
 
 
-# Generic Instance Explainability Recursive function for traces
 
-def generate_interpretability(trace_start,trace_end):
-    if trace_start == trace_end:
-        return 0
-    else: 
-        plot_name  = str(trace_start)
-        merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
-        lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
-        lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
-        lime_local_gen.visualize(0).write_html(plot_name+".html")
-        trace_start = trace_start + 1
-        return generate_interpretability (trace_start, trace_end)
+# SHAP Part
 
-#Test Case 1
-generate_interpretability (7,10)
+# from interpret.blackbox import ShapKernel
 
-#Test Case 2
-generate_interpretability (5474,5480)
-
-
-
-
-
-
-
-
-
-
-
-
+# merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
+# background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
+# background_val = shap.sample(merged_array_train,300)
 
 # # use Kernel SHAP to explain test set predictions
 # explainer = shap.KernelExplainer(shap_prob, background_val)
 # shap_values = explainer.shap_values(merged_array_test_shap)
-# shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name(0:10,0:10), show=false)
+# shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name, show=false) # see features name
 # plt.savefig('Shap_Bar.png',bbox_inches='tight')
 # plt.clf() #Clears the Plot space for next plots 
 # plt.cla()
