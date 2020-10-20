@@ -385,6 +385,9 @@ def make_features(i,j):
     print (temp1)
     return temp1
 
+
+make_features(1,4)
+
 # myList = list()
 # myList.append(padded_features[0:1])
 # myList.append(padded_features_time[0:1])
@@ -504,61 +507,87 @@ print (X_a[5474:5480])
 # Test Case Formulation
 # Test Case 1
 
-# multiple instances to test with lime
-merged_array_test_lime = np.hstack((X_a[7:8], X_t[7:8]))
-merged_array_test_lime1 = np.hstack((X_a[8:9], X_t[8:9]))
-merged_array_test_lime2 = np.hstack((X_a[9:10], X_t[9:10]))
+# # multiple instances to test with lime
+# merged_array_test_lime = np.hstack((X_a[7:8], X_t[7:8]))
+# merged_array_test_lime1 = np.hstack((X_a[8:9], X_t[8:9]))
+# merged_array_test_lime2 = np.hstack((X_a[9:10], X_t[9:10]))
 
-#Using Lime Tabular and applying local explanation with dynamic features
-lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(7,8))
-lime_local = lime.explain_local(merged_array_test_lime, y_a[7:8], name='LIME')
-lime_local.visualize(0).write_html("lime.html")
+# #Using Lime Tabular and applying local explanation with dynamic features
+# lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(7,8))
+# lime_local = lime.explain_local(merged_array_test_lime, y_a[7:8], name='LIME')
+# lime_local.visualize(0).write_html("lime.html")
 
-lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(8,9))
-lime_local1 = lime1.explain_local(merged_array_test_lime1, y_a[8:9], name='LIME1')
-lime_local1.visualize(0).write_html("lime1.html") 
+# lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(8,9))
+# lime_local1 = lime1.explain_local(merged_array_test_lime1, y_a[8:9], name='LIME1')
+# lime_local1.visualize(0).write_html("lime1.html") 
 
-lime2 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(9,10))
-lime_local2 = lime2.explain_local(merged_array_test_lime2, y_a[9:10], name='LIME2')
-lime_local2.visualize(0).write_html("lime2.html") 
-
-
-# Test Case 2
-
-# multiple instances to test with lime
-merged_array_test_lime9 = np.hstack((X_a[5474:5475], X_t[5474:5475]))
-merged_array_test_lime10 = np.hstack((X_a[5475:5476], X_t[5475:5476]))
-merged_array_test_lime11 = np.hstack((X_a[5476:5477], X_t[5476:5477]))
-merged_array_test_lime12 = np.hstack((X_a[5477:5478], X_t[5477:5478]))
-merged_array_test_lime13 = np.hstack((X_a[5478:5479], X_t[5478:5479]))
-merged_array_test_lime14 = np.hstack((X_a[5479:5480], X_t[5479:5480]))
+# lime2 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(9,10))
+# lime_local2 = lime2.explain_local(merged_array_test_lime2, y_a[9:10], name='LIME2')
+# lime_local2.visualize(0).write_html("lime2.html") 
 
 
-#Using Lime Tabular and applying local explanation with dynamic features
-lime9 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5474,5475))
-lime_local9 = lime9.explain_local(merged_array_test_lime9, y_a[5474:5475], name='LIME9')
-lime_local9.visualize(0).write_html("lime9.html") 
+# # Test Case 2
 
-lime10 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5475,5476))
-lime_local = lime10.explain_local(merged_array_test_lime10, y_a[5475:5476], name='LIME10')
-lime_local.visualize(0).write_html("lime10.html")
+# # multiple instances to test with lime
+# merged_array_test_lime9 = np.hstack((X_a[5474:5475], X_t[5474:5475]))
+# merged_array_test_lime10 = np.hstack((X_a[5475:5476], X_t[5475:5476]))
+# merged_array_test_lime11 = np.hstack((X_a[5476:5477], X_t[5476:5477]))
+# merged_array_test_lime12 = np.hstack((X_a[5477:5478], X_t[5477:5478]))
+# merged_array_test_lime13 = np.hstack((X_a[5478:5479], X_t[5478:5479]))
+# merged_array_test_lime14 = np.hstack((X_a[5479:5480], X_t[5479:5480]))
 
-lime11 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5476,5477))
-lime_local11 = lime11.explain_local(merged_array_test_lime11, y_a[5476:5477], name='LIME11')
-lime_local11.visualize(0).write_html("lime11.html") 
 
-lime12 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5477,5478))
-lime_local12 = lime12.explain_local(merged_array_test_lime12, y_a[5477:5478], name='LIME12')
-lime_local12.visualize(0).write_html("lime12.html") 
+# #Using Lime Tabular and applying local explanation with dynamic features
+# lime9 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5474,5475))
+# lime_local9 = lime9.explain_local(merged_array_test_lime9, y_a[5474:5475], name='LIME9')
+# lime_local9.visualize(0).write_html("lime9.html") 
 
-lime13 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5478,5479))
-lime_local13 = lime13.explain_local(merged_array_test_lime13, y_a[5478:5479], name='LIME13')
-lime_local13.visualize(0).write_html("lime13.html") 
+# lime10 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5475,5476))
+# lime_local = lime10.explain_local(merged_array_test_lime10, y_a[5475:5476], name='LIME10')
+# lime_local.visualize(0).write_html("lime10.html")
 
-lime14 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5479,5480))
-lime_local14 = lime14.explain_local(merged_array_test_lime14, y_a[5479:5480], name='LIME14')
-lime_local14.visualize(0).write_html("lime14.html") 
-lime_local14.visualize(0)
+# lime11 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5476,5477))
+# lime_local11 = lime11.explain_local(merged_array_test_lime11, y_a[5476:5477], name='LIME11')
+# lime_local11.visualize(0).write_html("lime11.html") 
+
+# lime12 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5477,5478))
+# lime_local12 = lime12.explain_local(merged_array_test_lime12, y_a[5477:5478], name='LIME12')
+# lime_local12.visualize(0).write_html("lime12.html") 
+
+# lime13 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5478,5479))
+# lime_local13 = lime13.explain_local(merged_array_test_lime13, y_a[5478:5479], name='LIME13')
+# lime_local13.visualize(0).write_html("lime13.html") 
+
+# lime14 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5479,5480))
+# lime_local14 = lime14.explain_local(merged_array_test_lime14, y_a[5479:5480], name='LIME14')
+# lime_local14.visualize(0).write_html("lime14.html") 
+
+
+# Generic Instance Explainability function
+
+trace_start = 5474
+trace_end = 5480
+
+def generate_interpretability(trace_start,j):
+    if trace_start == trace_end:
+        return 0
+    else: 
+        plot_name  = str(trace_start)
+        merged_array_test_gen = np.hstack((X_a[trace_start:j], X_t[trace_start:j]))
+        lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,j))
+        lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:j])
+        lime_local_gen.visualize(0).write_html(plot_name+".html")
+        trace_start = trace_start + 1
+        return generate_interpretability (trace_start, trace_start+1)
+
+generate_interpretability (trace_start, trace_start+1)
+
+
+
+
+
+
+
 
 
 
