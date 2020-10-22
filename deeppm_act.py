@@ -24,6 +24,8 @@ import csv
 from time import perf_counter
 import time
 
+import json #For dictionary to String conversion
+
 import matplotlib.pyplot as plt
 import plotly.express as px
 
@@ -248,7 +250,8 @@ outfile.write("Starting time: %s\n" % current_time)
  vocabulary,
  vocabulary_class,
  padded_features,
- padded_features_time) = load_data(logfile)
+ padded_features_time,
+ categorical_features_name) = load_data(logfile)
 
 emb_size = (vocab_size + 1 ) // 2 # --> ceil(vocab_size/2)
 
@@ -359,7 +362,7 @@ def make_features(i,j):
     temp = []
     temp = np.concatenate((padded_features[i:j], padded_features_time[i:j]), axis=None)
     temp1 = list (temp)
-    print (temp1)
+    #print (temp1)
     return temp1
 
 # Parsing the inputs the way LIME Explainer expects
@@ -378,6 +381,15 @@ def shap_prob(input_data):
     new_p1 = input_data[:,class_size:]
     preds = best_model.predict([new_p,new_p1])
     return preds
+
+
+result = json.dumps(vocabulary_class) 
+
+def legend(i,j):
+    temp = str(categorical_features_name[i:j])
+    temp.replace('list', '')
+    temp = temp[6 :-2 : ] #removing list keyword from string.
+    return temp
 
 
 merged_array_train = np.hstack((X_a, X_t))
@@ -403,7 +415,7 @@ def generate_interpretability(trace_start,trace_end):
         merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
         lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
         lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
-        plot = lime_local_gen.visualize(0).update_layout(xaxis_title=vocabulary_class)
+        plot = lime_local_gen.visualize(0).update_layout(xaxis_title=result, font=dict(size=8), yaxis_title=legend(trace_start, trace_start+1))
         px = plot
         plot.write_html(plot_name+".html")
         trace_start = trace_start + 1
