@@ -27,7 +27,7 @@ def load_data(logfile=None):
 
     for row in logreader:
         #t = datetime.strptime(row[2], "%Y/%m/%d %H:%M:%S.%f") # For BPI12 Dataset
-        # t = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S") # For Helpdesk Dataset
+        # t = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S") # For Original Helpdesk Dataset
         t = datetime.strptime(row[2], "%d.%m.%Y-%H:%M:%S")
         if row[0]!=lastcase:  #'lastcase' is to save the last executed case for the loop
             casestarttime = t
@@ -118,9 +118,6 @@ def load_data(logfile=None):
             vocab.add(seq[i])
             
     prefix_sizes = np.array(prefix_sizes)
-
-    print (prefix_sizes)
-
     print("Num sequences:", seqs)
     print("Activities: ",vocab )
     vocab_size = len(vocab)
@@ -170,4 +167,4 @@ def load_data(logfile=None):
     padded_features = pad_sequences(categorical_features_name, maxlen=max_length, padding='pre', dtype=object, value="Zero Padded Feature") #Padding feature name for Padded feature
     padded_features_time = pad_sequences(categorical_features_time, maxlen=max_length, padding='pre', dtype=object, value="Zero Padded Feature") #Padding feature time for Padded feature
 
-    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, vocabulary_class, padded_features, padded_features_time)
+    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, vocabulary_class, padded_features, padded_features_time, categorical_features_name)

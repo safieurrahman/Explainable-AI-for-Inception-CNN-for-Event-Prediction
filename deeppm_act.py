@@ -203,7 +203,7 @@ def fit_and_score(params):
 
 def classification_matrix(y_a_test, preds_a):
     cm = confusion_matrix(y_a_test, preds_a)
-    classes = ['0', '1', '2', '3','4','5','6','7','8','9','10'], #specific to dataset used
+    classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] #specific to dataset used
     fig = plt.figure(figsize=(10,10))
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Reds)
     plt.title('Confusion matrix for Classes')
@@ -226,7 +226,7 @@ def classification_matrix(y_a_test, preds_a):
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
-    plt.savefig('classification_matrix.png')
+    plt.savefig('confusion_matrix.png')
     plt.clf()
     plt.cla()
 
@@ -274,7 +274,7 @@ final_accuracy_scores = []
 final_mae_scores = []
 final_mse_scores = []
 #for f in range(3): #to run for once rather than 3 and averaging the output returns //k fold cross validation
-for f in range(1):    
+for f in range(3):    
     print("Fold", f)
     outfile.write("\nFold: %d" % f)
     # split into train and test set
@@ -355,14 +355,12 @@ print("\n\nFinal Brier score: ", final_brier_scores)
 print("Final Accuracy score: ", final_accuracy_scores)
 
 
-
 # Dynamic feature extraction for instances
 
 def make_features(i,j):
     temp = []
     temp = np.concatenate((padded_features[i:j], padded_features_time[i:j]), axis=None)
     temp1 = list (temp)
-    #print (temp1)
     return temp1
 
 # Parsing the inputs the way LIME Explainer expects
@@ -382,13 +380,15 @@ def shap_prob(input_data):
     preds = best_model.predict([new_p,new_p1])
     return preds
 
-
+#Converting dictionary to string
 result = json.dumps(vocabulary_class) 
+result = "Class Labels: " + result
 
 def legend(i,j):
     temp = str(categorical_features_name[i:j])
     temp.replace('list', '')
     temp = temp[6 :-2 : ] #removing list keyword from string.
+    temp = "Event Trace: " + temp
     return temp
 
 
@@ -415,9 +415,22 @@ def generate_interpretability(trace_start,trace_end):
         merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
         lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
         lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
-        plot = lime_local_gen.visualize(0).update_layout(xaxis_title=result, font=dict(size=8), yaxis_title=legend(trace_start, trace_start+1))
-        px = plot
+        plot = lime_local_gen.visualize(0).update_layout(xaxis_title=result, font=dict(size=4), yaxis_title=legend(trace_start, trace_start+1))
+        plot1 = lime_local_gen.visualize(0)
+    #     plot = lime_local_gen.visualize(0).add_annotation(
+    #     x=-3,
+    #     y=-0.5,
+    #     text="An annotation whose text and arrowhead reference the axes and the data",
+    #     # If axref is exactly the same as xref, then the text's position is
+    #     # absolute and specified in the same coordinates as xref.
+    # )
+
         plot.write_html(plot_name+".html")
+        plot.write_image(plot_name+".pdf")
+        plot.write_image(plot_name+".pdf")
+        plot1.write_html(plot_name+"1"+".html")
+        plot1.write_image(plot_name+"1"+".pdf")
+        plot.write_image(plot_name+".pdf")
         trace_start = trace_start + 1
         return generate_interpretability (trace_start, trace_end)
 
@@ -426,6 +439,9 @@ generate_interpretability (7,10)
 
 #Test Case 2
 generate_interpretability (5474,5480)
+
+#Test Case 3
+generate_interpretability (10,13)
 
 #Testing purpose
 
