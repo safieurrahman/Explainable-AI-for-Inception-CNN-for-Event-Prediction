@@ -204,7 +204,7 @@ def fit_and_score(params):
 def classification_matrix(y_a_test, preds_a):
     cm = confusion_matrix(y_a_test, preds_a)
     classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] #specific to dataset used
-    fig = plt.figure(figsize=(10,10))
+    fig = plt.figure(figsize=(11,11))
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Reds)
     plt.title('Confusion matrix for Classes')
     plt.colorbar()
@@ -274,7 +274,7 @@ final_accuracy_scores = []
 final_mae_scores = []
 final_mse_scores = []
 #for f in range(3): #to run for once rather than 3 and averaging the output returns //k fold cross validation
-for f in range(3):    
+for f in range(1):    
     print("Fold", f)
     outfile.write("\nFold: %d" % f)
     # split into train and test set
@@ -373,7 +373,6 @@ def lime_prob(input_data):
     preds = np.argmax(preds, axis=1)
     return preds
 
-
 def shap_prob(input_data):
     new_p = input_data[:,0:class_size]
     new_p1 = input_data[:,class_size:]
@@ -395,16 +394,6 @@ def legend(i,j):
 merged_array_train = np.hstack((X_a, X_t))
 y_a = np.argmax(y_a, axis=1)
 
-
-print (vocabulary) #Getting the vocabulary hence
-print (vocabulary_class)
-
-print (X_a[7:20])
-print (y_a[7:20])
-print (X_a[5474:5480])
-
-import plotly.express as px
-
 # Generic Instance Explainability Recursive function for traces
 
 def generate_interpretability(trace_start,trace_end):
@@ -417,14 +406,6 @@ def generate_interpretability(trace_start,trace_end):
         lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
         plot = lime_local_gen.visualize(0).update_layout(xaxis_title=result, font=dict(size=4), yaxis_title=legend(trace_start, trace_start+1))
         plot1 = lime_local_gen.visualize(0)
-    #     plot = lime_local_gen.visualize(0).add_annotation(
-    #     x=-3,
-    #     y=-0.5,
-    #     text="An annotation whose text and arrowhead reference the axes and the data",
-    #     # If axref is exactly the same as xref, then the text's position is
-    #     # absolute and specified in the same coordinates as xref.
-    # )
-
         plot.write_html(plot_name+".html")
         plot.write_image(plot_name+".pdf")
         plot.write_image(plot_name+".pdf")
@@ -442,6 +423,11 @@ generate_interpretability (5474,5480)
 
 #Test Case 3
 generate_interpretability (10,13)
+
+
+print (X_t[7:10])
+print (X_t[5474:5480])
+print (X_t[10:13])
 
 #Testing purpose
 
