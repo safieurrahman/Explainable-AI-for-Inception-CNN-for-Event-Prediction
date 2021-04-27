@@ -41,6 +41,9 @@ warnings.filterwarnings('ignore')
 
 from interpret.blackbox import LimeTabular
 
+
+input_length_lime = int
+
 class DataGenerator(Sequence):
     def __init__(self, features, labels, batch_size=32, shuffle=True):
         self.batch_size = batch_size
@@ -146,7 +149,8 @@ def get_model(input_length=10, n_filters=3, vocab_size=10, n_classes=9, embeddin
 
 
 def fit_and_score(params):
-    print(params)
+
+    print (params)
     start_time = perf_counter()
 
     model = get_model(input_length=params['input_length'], vocab_size=params['vocab_size'], n_classes=params['n_classes'], model_type=params['model_type'],
@@ -201,9 +205,9 @@ def fit_and_score(params):
     return {'loss': score, 'status': STATUS_OK,  'n_epochs':  len(h.history['loss']), 'n_params':model.count_params(), 'time':end_time - start_time}
 
 
-def classification_matrix(y_a_test, preds_a):
+def classification_matrix(y_a_test, preds_a, n_classes):
     cm = confusion_matrix(y_a_test, preds_a)
-    classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] #specific to dataset used
+    classes = [i for i in range(n_classes-1)]#specific to dataset used
     fig = plt.figure(figsize=(11,11))
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Reds)
     plt.title('Confusion matrix for Classes')
@@ -316,6 +320,7 @@ for f in range(1):
 
     outfile.write("\n\nBest parameters:")
     print(best_params, file=outfile)
+
     outfile.write("\nModel parameters: %d" % best_numparameters)
     outfile.write('\nBest Time taken: %f'%best_time)
 
@@ -335,7 +340,7 @@ for f in range(1):
     final_accuracy_scores.append(accuracy)
 
     print(classification_report(y_a_test, preds_a))
-    classification_matrix(y_a_test, preds_a)
+    classification_matrix(y_a_test, preds_a, best_params['n_classes'])
 
     outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
     
@@ -348,6 +353,7 @@ print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
 outfile.close()
 
 ################################################################************************#################################################################
+
 
 #XAI Part Implementation
 
@@ -365,7 +371,7 @@ def make_features(i,j):
 
 # Parsing the inputs the way LIME Explainer expects
 
-class_size = len(vocabulary)
+class_size = best_params['input_length']
 def lime_prob(input_data):
     new_p = input_data[:,0:class_size]
     new_p1 = input_data[:,class_size:]
@@ -404,7 +410,7 @@ def generate_interpretability(trace_start,trace_end):
         merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
         lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
         lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
-        plot = lime_local_gen.visualize(0).update_layout(xaxis_title=result, font=dict(size=4), yaxis_title=legend(trace_start, trace_start+1))
+        plot = lime_local_gen.visualize(0).update_layout(xaxis_title=legend(trace_start, trace_start+1), font=dict(size=4))
         plot1 = lime_local_gen.visualize(0)
         plot.write_html(plot_name+".html")
         plot.write_image(plot_name+".pdf")
@@ -415,7 +421,8 @@ def generate_interpretability(trace_start,trace_end):
         trace_start = trace_start + 1
         return generate_interpretability (trace_start, trace_end)
 
-#Test Case 1
+
+# Test Case 1
 generate_interpretability (7,10)
 
 #Test Case 2
@@ -425,9 +432,10 @@ generate_interpretability (5474,5480)
 generate_interpretability (10,13)
 
 
-print (X_t[7:10])
-print (X_t[5474:5480])
-print (X_t[10:13])
+# Printing activties and their corresponding labels
+print ("\n Different activities with their corresponding labels can be interpreted from this legend: \n")
+for key, value in enumerate(vocabulary_class):
+    print (key,"---------", value)
 
 #Testing purpose
 
@@ -517,3 +525,22 @@ print (X_t[10:13])
 
 
 
+# For Backup
+# def generate_interpretability(trace_start,trace_end):
+#     if trace_start == trace_end:
+#         return 0
+#     else: 
+#         plot_name  = str(trace_start)
+#         merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
+#         lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
+#         lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
+#         plot = lime_local_gen.visualize(0).update_layout(xaxis_title=result, font=dict(size=4), yaxis_title=legend(trace_start, trace_start+1))
+#         plot1 = lime_local_gen.visualize(0)
+#         plot.write_html(plot_name+".html")
+#         plot.write_image(plot_name+".pdf")
+#         plot.write_image(plot_name+".pdf")
+#         plot1.write_html(plot_name+"1"+".html")
+#         plot1.write_image(plot_name+"1"+".pdf")
+#         plot.write_image(plot_name+".pdf")
+#         trace_start = trace_start + 1
+#         return generate_interpretability (trace_start, trace_end)

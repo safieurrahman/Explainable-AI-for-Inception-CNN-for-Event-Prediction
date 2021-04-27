@@ -8,10 +8,16 @@ def load_data(logfile=None):
     from keras.preprocessing.sequence import pad_sequences
 
     vocabulary = set()
+    
+    print (logfile)
 
     csvfile = open(logfile, 'r')
-    logreader = csv.reader(csvfile, delimiter=';')
-    # logreader = csv.reader(csvfile, delimiter=',') # For Helpdesk, BPI12
+    if "receipt" in logfile: # For Receipt Dataset
+        logreader = csv.reader(csvfile, delimiter=',')
+
+    elif "helpdesk" in logfile: 
+        logreader = csv.reader(csvfile, delimiter=';') # For Helpdesk Dataset
+
     next(logreader, None)  # skip the headers
 
     lastcase = '' 
@@ -26,9 +32,11 @@ def load_data(logfile=None):
     max_length = 0
 
     for row in logreader:
-        #t = datetime.strptime(row[2], "%Y/%m/%d %H:%M:%S.%f") # For BPI12 Dataset
-        # t = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S") # For Original Helpdesk Dataset
-        t = datetime.strptime(row[2], "%d.%m.%Y-%H:%M:%S")
+        if "receipt" in logfile: # For Receipt Dataset 
+            t = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S.%f")
+        elif "helpdesk" in logfile: 
+            t = datetime.strptime(row[2], "%d.%m.%Y-%H:%M:%S") # For Helpdesk Dataset
+
         if row[0]!=lastcase:  #'lastcase' is to save the last executed case for the loop
             casestarttime = t
             lasteventtime = t
@@ -147,11 +155,12 @@ def load_data(logfile=None):
     vocabulary_class = {}
 
     # Finding where the class occurs which is not to be predicted
+    print (dict_y)
     for key,value in enumerate(dict_y):
         if (key!=value):
             rebel = key
             break
-
+    
     # deleting that class from dictionary
     for name in vocabulary_clone.copy():
         if (vocabulary_clone[name] == rebel):
