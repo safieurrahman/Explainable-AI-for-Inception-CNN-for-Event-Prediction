@@ -9,8 +9,6 @@ def load_data(logfile=None):
 
     vocabulary = set()
     
-    print (logfile)
-
     csvfile = open(logfile, 'r')
     if "receipt" in logfile: # For Receipt Dataset
         logreader = csv.reader(csvfile, delimiter=',')
@@ -27,9 +25,11 @@ def load_data(logfile=None):
 
     lines = [] #these are all the activity seq
     timeseqs = [] #time sequences (differences between two events)
+    trace_start_list = []
 
     numcases = 0
     max_length = 0
+    trace_start_index = 0
 
     for row in logreader:
         if "receipt" in logfile: # For Receipt Dataset 
@@ -49,6 +49,12 @@ def load_data(logfile=None):
             line = []
             times = []
             numcases += 1
+            if trace_start_index != 0:
+                trace_start_index-=1 # To remove index for last case which is not counted as a prefix
+                trace_start_list.append(trace_start_index)
+            elif trace_start_index == 0:
+                trace_start_list.append(trace_start_index)
+
 
         vocabulary.add(row[1])
         line.append(row[1])
@@ -58,6 +64,7 @@ def load_data(logfile=None):
         times.append(timediff+1)
         lasteventtime = t
         firstLine = False
+        trace_start_index+=1
 
     lines.append(line)
     timeseqs.append(times)
@@ -127,7 +134,7 @@ def load_data(logfile=None):
             
     prefix_sizes = np.array(prefix_sizes)
     print("Num sequences:", seqs)
-    print("Activities: ",vocab )
+    # print("Activities: ",vocab )
     vocab_size = len(vocab)
 
     X = np.array(X)
@@ -147,7 +154,7 @@ def load_data(logfile=None):
     for i in range(len(y)):
         y[i] = dict_y[y[i]]
     y_unique = np.unique(y, return_counts=True)
-    print("Classes: ", y_unique)
+    # print("Classes: ", y_unique)
     n_classes = y_unique[0].shape[0]
 
     # Establishing vocabulary for classes by removing non-predicatable class from vocabulary (For Helpdesk Dataset)
@@ -155,7 +162,6 @@ def load_data(logfile=None):
     vocabulary_class = {}
 
     # Finding where the class occurs which is not to be predicted
-    print (dict_y)
     for key,value in enumerate(dict_y):
         if (key!=value):
             rebel = key
@@ -176,4 +182,4 @@ def load_data(logfile=None):
     padded_features = pad_sequences(categorical_features_name, maxlen=max_length, padding='pre', dtype=object, value="Zero Padded Feature") #Padding feature name for Padded feature
     padded_features_time = pad_sequences(categorical_features_time, maxlen=max_length, padding='pre', dtype=object, value="Zero Padded Feature") #Padding feature time for Padded feature
 
-    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, vocabulary_class, padded_features, padded_features_time, categorical_features_name)
+    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, vocabulary_class, padded_features, padded_features_time, categorical_features_name, trace_start_list)

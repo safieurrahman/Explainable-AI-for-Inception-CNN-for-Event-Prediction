@@ -1,4 +1,5 @@
 import numpy as np
+import random
 seed = 123
 np.random.seed(seed)
 from tensorflow import set_random_seed
@@ -23,7 +24,6 @@ import sys
 import csv 
 from time import perf_counter
 import time
-
 import json #For dictionary to String conversion
 
 import matplotlib.pyplot as plt
@@ -149,8 +149,7 @@ def get_model(input_length=10, n_filters=3, vocab_size=10, n_classes=9, embeddin
 
 
 def fit_and_score(params):
-
-    print (params)
+    
     start_time = perf_counter()
 
     model = get_model(input_length=params['input_length'], vocab_size=params['vocab_size'], n_classes=params['n_classes'], model_type=params['model_type'],
@@ -191,7 +190,6 @@ def fit_and_score(params):
 
     scores = [h.history['val_loss'][epoch] for epoch in range(len(h.history['loss']))]
     score = min(scores)
-    print(score)
 
     global best_score, best_model, best_time, best_numparameters
     end_time = perf_counter()
@@ -255,7 +253,8 @@ outfile.write("Starting time: %s\n" % current_time)
  vocabulary_class,
  padded_features,
  padded_features_time,
- categorical_features_name) = load_data(logfile)
+ categorical_features_name,
+ trace_start_list) = load_data(logfile)
 
 emb_size = (vocab_size + 1 ) // 2 # --> ceil(vocab_size/2)
 
@@ -358,7 +357,7 @@ outfile.close()
 #XAI Part Implementation
 
 print("\n\nFinal Brier score: ", final_brier_scores)
-print("Final Accuracy score: ", final_accuracy_scores)
+print("Final Accuracy score: ", final_accuracy_scores,"\n")
 
 
 # Dynamic feature extraction for instances
@@ -410,7 +409,7 @@ def generate_interpretability(trace_start,trace_end):
         merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
         lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
         lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
-        plot = lime_local_gen.visualize(0).update_layout(xaxis_title=legend(trace_start, trace_start+1), font=dict(size=4))
+        plot = lime_local_gen.visualize(0).update_layout(font=dict(size=4))
         plot1 = lime_local_gen.visualize(0)
         plot.write_html(plot_name+".html")
         plot.write_image(plot_name+".pdf")
@@ -418,22 +417,31 @@ def generate_interpretability(trace_start,trace_end):
         plot1.write_html(plot_name+"1"+".html")
         plot1.write_image(plot_name+"1"+".pdf")
         plot.write_image(plot_name+".pdf")
+        print ("Figure",plot_name, "plotted for trace: ",legend(trace_start, trace_start+1),"\n")
         trace_start = trace_start + 1
         return generate_interpretability (trace_start, trace_end)
 
 
-# Test Case 1
-generate_interpretability (7,10)
 
-#Test Case 2
-generate_interpretability (5474,5480)
 
-#Test Case 3
-generate_interpretability (10,13)
+if "helpdesk" in logfile: # For Helpdesk Dataset
+    # Test Case 1
+    generate_interpretability (7,10)
+    #Test Case 2
+    generate_interpretability (5474,5480)
+    #Test Case 3
+    generate_interpretability (10,13)
 
+elif "receipt" in logfile: 
+    
+    random_start = random.choice(trace_start_list)
+    temp = trace_start_list.index(random_start)
+    random_end = trace_start_list[temp+1]
+    # generate_interpretability (random_start,random_end)
+    generate_interpretability (0,3)
 
 # Printing activties and their corresponding labels
-print ("\n Different activities with their corresponding labels can be interpreted from this legend: \n")
+print ("\nDifferent activities with their corresponding labels can be interpreted from this legend: \n")
 for key, value in enumerate(vocabulary_class):
     print (key,"---------", value)
 
