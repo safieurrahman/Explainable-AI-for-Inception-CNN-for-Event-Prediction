@@ -263,8 +263,7 @@ X_t = X_t / np.max(X_t)
 # categorical output
 y_a = to_categorical(y_a)
 
-#n_iter = 20 #Commented for faster compilation at the expense of training weights
-n_iter = 1
+n_iter = 20 #Commented for faster compilation at the expense of training weights
 
 space = {'input_length':max_length, 'vocab_size':vocab_size, 'n_classes':n_classes, 'model_type':model_type, 'embedding_size':emb_size,
          'n_modules':hp.choice('n_modules', [1,2,3]),
@@ -276,8 +275,8 @@ final_brier_scores = []
 final_accuracy_scores = []
 final_mae_scores = []
 final_mse_scores = []
-#for f in range(3): #to run for once rather than 3 and averaging the output returns //k fold cross validation
-for f in range(1):    
+
+for f in range(3): # k fold cross validation   
     print("Fold", f)
     outfile.write("\nFold: %d" % f)
     # split into train and test set
@@ -339,7 +338,7 @@ for f in range(1):
     final_accuracy_scores.append(accuracy)
 
     print(classification_report(y_a_test, preds_a))
-    classification_matrix(y_a_test, preds_a, best_params['n_classes'])
+    # classification_matrix(y_a_test, preds_a, best_params['n_classes'])
 
     outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
     
@@ -378,12 +377,6 @@ def lime_prob(input_data):
     preds = np.argmax(preds, axis=1)
     return preds
 
-def shap_prob(input_data):
-    new_p = input_data[:,0:class_size]
-    new_p1 = input_data[:,class_size:]
-    preds = best_model.predict([new_p,new_p1])
-    return preds
-
 #Converting dictionary to string
 result = json.dumps(vocabulary_class) 
 result = "Class Labels: " + result
@@ -395,12 +388,10 @@ def legend(i,j):
     temp = "Event Trace: " + temp
     return temp
 
-
 merged_array_train = np.hstack((X_a, X_t))
 y_a = np.argmax(y_a, axis=1)
 
 # Generic Instance Explainability Recursive function for traces
-
 def generate_interpretability(trace_start,trace_end):
     if trace_start == trace_end:
         return 0
@@ -409,20 +400,12 @@ def generate_interpretability(trace_start,trace_end):
         merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
         lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
         lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
-        plot = lime_local_gen.visualize(0).update_layout(font=dict(size=4))
-        plot1 = lime_local_gen.visualize(0)
+        plot = lime_local_gen.visualize(0).update_layout(font=dict(size=8))
         plot.write_html(plot_name+".html")
-        plot.write_image(plot_name+".pdf")
-        plot.write_image(plot_name+".pdf")
-        plot1.write_html(plot_name+"1"+".html")
-        plot1.write_image(plot_name+"1"+".pdf")
         plot.write_image(plot_name+".pdf")
         print ("Figure",plot_name, "plotted for trace: ",legend(trace_start, trace_start+1),"\n")
         trace_start = trace_start + 1
         return generate_interpretability (trace_start, trace_end)
-
-
-
 
 if "helpdesk" in logfile: # For Helpdesk Dataset
     # Test Case 1
@@ -433,122 +416,12 @@ if "helpdesk" in logfile: # For Helpdesk Dataset
     generate_interpretability (10,13)
 
 elif "receipt" in logfile: 
-    
     random_start = random.choice(trace_start_list)
     temp = trace_start_list.index(random_start)
     random_end = trace_start_list[temp+1]
-    # generate_interpretability (random_start,random_end)
-    generate_interpretability (0,3)
+    generate_interpretability (random_start,random_end)
 
 # Printing activties and their corresponding labels
 print ("\nDifferent activities with their corresponding labels can be interpreted from this legend: \n")
 for key, value in enumerate(vocabulary_class):
     print (key,"---------", value)
-
-#Testing purpose
-
-# for i in range(15):
-#     print ("Sample is this: ", X_a[i:i+1], X_t[i:i+1])
-#     print ("Ground truth is this: ", np.argmax(y_a[i:i+1], axis=1))
-#     pred = best_model.predict([X_a[i:i+1], X_t[i:i+1]])
-#     pred = np.argmax(pred, axis=1)
-#     print ("Predicted is this: ", pred)
-
-
-# Test Case Formulation
-# Test Case 1
-
-# # multiple instances to test with lime
-# merged_array_test_lime = np.hstack((X_a[7:8], X_t[7:8]))
-# merged_array_test_lime1 = np.hstack((X_a[8:9], X_t[8:9]))
-# merged_array_test_lime2 = np.hstack((X_a[9:10], X_t[9:10]))
-
-# #Using Lime Tabular and applying local explanation with dynamic features
-# lime = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(7,8))
-# lime_local = lime.explain_local(merged_array_test_lime, y_a[7:8], name='LIME')
-# lime_local.visualize(0).write_html("lime.html")
-
-# lime1 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(8,9))
-# lime_local1 = lime1.explain_local(merged_array_test_lime1, y_a[8:9], name='LIME1')
-# lime_local1.visualize(0).write_html("lime1.html") 
-
-# lime2 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(9,10))
-# lime_local2 = lime2.explain_local(merged_array_test_lime2, y_a[9:10], name='LIME2')
-# lime_local2.visualize(0).write_html("lime2.html") 
-
-
-# # Test Case 2
-
-# # multiple instances to test with lime
-# merged_array_test_lime9 = np.hstack((X_a[5474:5475], X_t[5474:5475]))
-# merged_array_test_lime10 = np.hstack((X_a[5475:5476], X_t[5475:5476]))
-# merged_array_test_lime11 = np.hstack((X_a[5476:5477], X_t[5476:5477]))
-# merged_array_test_lime12 = np.hstack((X_a[5477:5478], X_t[5477:5478]))
-# merged_array_test_lime13 = np.hstack((X_a[5478:5479], X_t[5478:5479]))
-# merged_array_test_lime14 = np.hstack((X_a[5479:5480], X_t[5479:5480]))
-
-
-# #Using Lime Tabular and applying local explanation with dynamic features
-# lime9 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5474,5475))
-# lime_local9 = lime9.explain_local(merged_array_test_lime9, y_a[5474:5475], name='LIME9')
-# lime_local9.visualize(0).write_html("lime9.html") 
-
-# lime10 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5475,5476))
-# lime_local = lime10.explain_local(merged_array_test_lime10, y_a[5475:5476], name='LIME10')
-# lime_local.visualize(0).write_html("lime10.html")
-
-# lime11 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5476,5477))
-# lime_local11 = lime11.explain_local(merged_array_test_lime11, y_a[5476:5477], name='LIME11')
-# lime_local11.visualize(0).write_html("lime11.html") 
-
-# lime12 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5477,5478))
-# lime_local12 = lime12.explain_local(merged_array_test_lime12, y_a[5477:5478], name='LIME12')
-# lime_local12.visualize(0).write_html("lime12.html") 
-
-# lime13 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5478,5479))
-# lime_local13 = lime13.explain_local(merged_array_test_lime13, y_a[5478:5479], name='LIME13')
-# lime_local13.visualize(0).write_html("lime13.html") 
-
-# lime14 = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(5479,5480))
-# lime_local14 = lime14.explain_local(merged_array_test_lime14, y_a[5479:5480], name='LIME14')
-# lime_local14.visualize(0).write_html("lime14.html") 
-
-
-
-# SHAP Part
-
-# from interpret.blackbox import ShapKernel
-
-# merged_array_test_shap = np.hstack((X_a_test[0:10], X_t_test[0:10]))
-# background_val1 = np.median(merged_array, axis=0).reshape(1, -1) 
-# background_val = shap.sample(merged_array_train,300)
-
-# # use Kernel SHAP to explain test set predictions
-# explainer = shap.KernelExplainer(shap_prob, background_val)
-# shap_values = explainer.shap_values(merged_array_test_shap)
-# shap.summary_plot(shap_values, merged_array_test_shap, plot_type="bar", feature_names=features_name, show=false) # see features name
-# plt.savefig('Shap_Bar.png',bbox_inches='tight')
-# plt.clf() #Clears the Plot space for next plots 
-# plt.cla()
-
-
-
-# For Backup
-# def generate_interpretability(trace_start,trace_end):
-#     if trace_start == trace_end:
-#         return 0
-#     else: 
-#         plot_name  = str(trace_start)
-#         merged_array_test_gen = np.hstack((X_a[trace_start:trace_start+1], X_t[trace_start:trace_start+1]))
-#         lime_gen = LimeTabular(predict_fn=lime_prob, data=merged_array_train, feature_names=make_features(trace_start,trace_start+1))
-#         lime_local_gen = lime_gen.explain_local(merged_array_test_gen, y_a[trace_start:trace_start+1])
-#         plot = lime_local_gen.visualize(0).update_layout(xaxis_title=result, font=dict(size=4), yaxis_title=legend(trace_start, trace_start+1))
-#         plot1 = lime_local_gen.visualize(0)
-#         plot.write_html(plot_name+".html")
-#         plot.write_image(plot_name+".pdf")
-#         plot.write_image(plot_name+".pdf")
-#         plot1.write_html(plot_name+"1"+".html")
-#         plot1.write_image(plot_name+"1"+".pdf")
-#         plot.write_image(plot_name+".pdf")
-#         trace_start = trace_start + 1
-#         return generate_interpretability (trace_start, trace_end)

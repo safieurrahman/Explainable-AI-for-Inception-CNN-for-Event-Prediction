@@ -7,7 +7,7 @@ def load_data(logfile=None):
     from datetime import datetime
     from keras.preprocessing.sequence import pad_sequences
 
-    vocabulary = set()
+    vocabulary = list()
     
     csvfile = open(logfile, 'r')
     if "receipt" in logfile: # For Receipt Dataset
@@ -56,7 +56,8 @@ def load_data(logfile=None):
                 trace_start_list.append(trace_start_index)
 
 
-        vocabulary.add(row[1])
+        if row[1] not in vocabulary:
+            vocabulary.append(row[1])
         line.append(row[1])
         timesincelastevent = t - lasteventtime
         timediff = 86400 * timesincelastevent.days + timesincelastevent.seconds + timesincelastevent.microseconds/1000000
@@ -134,7 +135,6 @@ def load_data(logfile=None):
             
     prefix_sizes = np.array(prefix_sizes)
     print("Num sequences:", seqs)
-    # print("Activities: ",vocab )
     vocab_size = len(vocab)
 
     X = np.array(X)
@@ -154,7 +154,7 @@ def load_data(logfile=None):
     for i in range(len(y)):
         y[i] = dict_y[y[i]]
     y_unique = np.unique(y, return_counts=True)
-    # print("Classes: ", y_unique)
+    print("Classes: ", y_unique)
     n_classes = y_unique[0].shape[0]
 
     # Establishing vocabulary for classes by removing non-predicatable class from vocabulary (For Helpdesk Dataset)
